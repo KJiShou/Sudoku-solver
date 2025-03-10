@@ -1,4 +1,3 @@
-from tqdm import tqdm
 import time
 # TODO: get the 2D array of the sudoku
 # TODO: show one by one the 2D array && process bar
@@ -67,10 +66,4 @@ if __name__ == '__main__':
         ]
     ]
 
-    progress = tqdm(total=5, position=0, leave=True)
-    for i in range(5):
-        time.sleep(0.5)
-        tqdm.write(f"\033[FLine 1: {'#' * (i + 5)}{'-' * (10 - i - 5)}")
-        tqdm.write(f"\033[FLine 2: {'#' * (i + 6)}{'-' * (9 - i - 5)}")
-        tqdm.write(f"\033[FLine 3: {'#' * (i + 7)}{'-' * (8 - i - 5)}")
-        progress.update(1)
+    print_sudoku(sudoku_data)
