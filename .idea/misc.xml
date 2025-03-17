@@ -2,7 +2,11 @@
 <project version="4">
   <component name="Black">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <option name="sdkName" value="Python 3.13" />
+=======
+    <option name="sdkName" value="Python 3.12" />
+>>>>>>> 713f36b (update files)
 =======
     <option name="sdkName" value="Python 3.12" />
 >>>>>>> 713f36b (update files)
