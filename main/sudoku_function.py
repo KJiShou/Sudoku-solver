@@ -62,12 +62,7 @@ def solve(board):
     return True
 
 
-# temporary sudoku solver
-def sudoku_solver(board: list):
-    solve(board)
-
-
-if __name__ == '__main__':
+def sudoku_solver():
     # example data of sudoku
     sudoku_data = [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
