@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
 =======
     <orderEntry type="inheritedJdk" />
@@ -11,6 +12,16 @@
 =======
     <orderEntry type="inheritedJdk" />
 >>>>>>> 713f36b (update files)
+=======
+    <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
+<<<<<<< HEAD
+    <orderEntry type="inheritedJdk" />
+=======
+=======
+    <orderEntry type="inheritedJdk" />
+>>>>>>> 713f36b (update files)
+>>>>>>> 1b885bf (update files)
+>>>>>>> a89d06c (update files)
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

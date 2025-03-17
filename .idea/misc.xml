@@ -3,6 +3,7 @@
   <component name="Black">
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     <option name="sdkName" value="Python 3.13" />
 =======
     <option name="sdkName" value="Python 3.12" />
@@ -10,6 +11,16 @@
 =======
     <option name="sdkName" value="Python 3.12" />
 >>>>>>> 713f36b (update files)
+=======
+    <option name="sdkName" value="Python 3.12" />
+=======
+<<<<<<< HEAD
+    <option name="sdkName" value="Python 3.13" />
+=======
+    <option name="sdkName" value="Python 3.12" />
+>>>>>>> 713f36b (update files)
+>>>>>>> 1b885bf (update files)
+>>>>>>> a89d06c (update files)
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12" project-jdk-type="Python SDK" />
 </project>
