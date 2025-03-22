@@ -28,13 +28,13 @@ def show_procedure(board: list):
         if i + 1 == total_step:
             input("Press Enter to continue...")
             return
-        if input("next? (y/n): ").lower() == "y":
-            pass
-        else:
+        if input("skip? (y): ").lower() == "y":
             return
+        else:
+            pass
 
 
-def is_valid(board, num, row, col):
+def is_valid(board: list, num: int, row: int, col: int) -> bool:
     for i in range(9):
         if board[row][i] == num or board[i][col] == num:
             return False
@@ -62,7 +62,7 @@ def solve(board):
     return True
 
 
-def sudoku_solver():
+if __name__ == "__main__":
     # example data of sudoku
     sudoku_data = [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
