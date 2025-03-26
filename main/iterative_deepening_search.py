@@ -3,27 +3,43 @@ import time
 import tracemalloc
 from copy import deepcopy
 
+def find_empty(board):
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] == 0:
+                return i, j
+    return None
 
-def solve(board: list) -> list:
-    process = list()
-    # calculate the max depth for the sudoku
-    max_depth = 0
-    for i in range(len(board)):
-        for j in range(len(board)):
-            if board[i][j] != 0:
-                max_depth += 1
+def dfs(board, depth, max_depth, process):
+    if depth > max_depth:
+        return False
 
-    coordinate_x = 0
-    coordinate_y = 0
-    depth = 0
-    while depth < max_depth:
-        for i in range(1, 10):
-            if sudoku.is_valid(board, i, coordinate_x, coordinate_y):
-                board[coordinate_x][coordinate_y] = i
-                process.append(deepcopy(board))
-            else:
-                pass
+    empty = find_empty(board)
+    if not empty:
+        return True  # Solved
 
+    row, col = empty
+
+    for num in range(1, 10):
+        if sudoku.is_valid(board, num, row, col):
+            board[row][col] = num
+            process.append(deepcopy(board))
+
+            if dfs(board, depth + 1, max_depth, process):
+                return True
+
+            board[row][col] = 0  # Backtrack
+
+    return False
+
+
+def iterative_deepening(board):
+    process = []
+    for max_depth in range(1, 82):  # max 81 moves
+        copied_board = deepcopy(board)
+        if dfs(copied_board, 0, max_depth, process):
+            return copied_board, process
+    return None, process
 
 if __name__ == "__main__":
     # example data of sudoku
@@ -69,12 +85,16 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # solve function
-    # sudoku.solve(sudoku_data)
+    solution, process = iterative_deepening(sudoku_data)
 
     # record end time
     end_time = time.time()
     time_taken = end_time - start_time
-    sudoku.show_procedure(sudoku.process)
+
+    if solution:
+        sudoku.show_procedure(process)
+    else:
+        print("No solution found.")
 
     # Get current and peak memory usage
     _, peak = tracemalloc.get_traced_memory()
