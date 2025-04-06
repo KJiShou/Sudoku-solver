@@ -2,7 +2,6 @@ import time
 import tracemalloc
 from copy import deepcopy
 import threading
-import sys
 
 # Animation thread flag
 solving = True
@@ -25,7 +24,7 @@ def animate_solving():
     symbols = ["Solving.  ", "Solving.. ", "Solving..."]
     idx = 0
     while solving:
-        print("\r🔄 " + symbols[idx % len(symbols)], end="")
+        print("\r" + symbols[idx % len(symbols)], end="")
         time.sleep(0.5)
         idx += 1
 
@@ -42,7 +41,7 @@ def print_sudoku(board: list):
         print()
         if row % 3 == 2 and row != 8:
             print("- " * 17)
-    print("\n          ✅ FINAL RESULT\n")
+    print("\n          FINAL RESULT\n")
 
 
 def show_procedure(board_list: list, depth_list: list):
@@ -76,7 +75,7 @@ def show_procedure(board_list: list, depth_list: list):
 
         # start to print
         print("\n" * 5)
-
+        print(f"Max Depth: {max(depth_list)}")
         for row in range(9):
             for b_idx, board in enumerate(boards):
                 for col in range(9):
@@ -114,7 +113,7 @@ def show_procedure(board_list: list, depth_list: list):
             if choice.strip().lower() == 'y':
                 break
 
-    print(f"\n✅ Finished showing all {total_step} steps for this depth.\nReturning to menu...\n")
+    print(f"\nFinished showing all {total_step} steps for this depth.\nReturning to menu...\n")
 
 
 def find_empty(board):
@@ -125,7 +124,7 @@ def find_empty(board):
     return None
 
 
-def dfs(board, depth, max_depth, process, depth_log):
+def dfs(board, depth, max_depth, process, depth_log, limit_log):
     if depth > max_depth:
         return False
 
@@ -139,9 +138,10 @@ def dfs(board, depth, max_depth, process, depth_log):
         if is_valid(board, num, row, col):
             board[row][col] = num
             process.append(deepcopy(board))
-            depth_log.append(max_depth)
+            limit_log.append(max_depth + 1)
+            depth_log.append(depth + 1)
 
-            if dfs(board, depth + 1, max_depth, process, depth_log):
+            if dfs(board, depth + 1, max_depth, process, depth_log, limit_log):
                 return True
 
             board[row][col] = 0  # Backtrack
@@ -152,12 +152,16 @@ def dfs(board, depth, max_depth, process, depth_log):
 
 def iterative_deepening(board):
     process = []
+    limit_log = []
     depth_log = []
-    for max_depth in range(1, 82):  # max 81 moves
+    for max_depth in range(0, 81):  # max 81 moves
         copied_board = deepcopy(board)
-        if dfs(copied_board, 0, max_depth, process, depth_log):
-            return copied_board, process, depth_log
-    return None, process, depth_log
+        process.append(deepcopy(board))
+        limit_log.append(max_depth + 1)
+        depth_log.append(0)
+        if dfs(copied_board, 0, max_depth, process, depth_log, limit_log):
+            return copied_board, process, depth_log, limit_log
+    return None, process, depth_log, limit_log
 
 
 if __name__ == "__main__":
@@ -183,33 +187,33 @@ if __name__ == "__main__":
     tracemalloc.start()
     start_time = time.time()
 
-    solution, process, depth_log = iterative_deepening(sudoku_data)
+    solution, process, depth_log, limit_log = iterative_deepening(sudoku_data)
 
     # Stop animation
     solving = False
     anim_thread.join()
-    print("\r✅ Solved!                            ")
+    print("\rSolved!                            ")
 
     end_time = time.time()
     time_taken = end_time - start_time
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
 
-    print(f"\n✅ Sudoku Solved!")
-    print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
-    print(f"📊 Time Usage  : {time_taken:.6f} seconds\n")
+    print(f"\nSudoku Solved!")
+    print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
+    print(f"Time Usage  : {time_taken:.6f} seconds\n")
 
     # 🎮 Interactive loop
     while True:
-        print("📌 Options:")
-        print(f"  - Enter a depth number (max: {depth_log[-1]}) to view that step process")
+        print("Options:")
+        print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
         print("  - Type 'result' to see the final solved board")
         print("  - Type 'exit' to quit\n")
 
-        cmd = input("🔎 What would you like to see? \n").strip().lower()
+        cmd = input("What would you like to see? \n").strip().lower()
 
         if cmd == 'exit':
-            print("👋 Exiting. Goodbye!")
+            print("Exiting. Goodbye!")
             break
         elif cmd == 'result':
             print_sudoku(solution)
@@ -217,15 +221,15 @@ if __name__ == "__main__":
             depth_choice = int(cmd)
             filtered_boards = []
             filtered_depths = []
-            for b, d in zip(process, depth_log):
-                if d == depth_choice:
+            for b, d, l in zip(process, depth_log, limit_log):
+                if l == depth_choice:
                     filtered_boards.append(b)
                     filtered_depths.append(d)
 
             if not filtered_boards:
-                print(f"⚠️  No steps found for depth {depth_choice}. Try another.\n")
+                print(f"No steps found for depth {depth_choice}. Try another.\n")
             else:
-                print(f"\n📈 Showing {len(filtered_boards)} step(s) for depth {depth_choice}")
+                print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
                 show_procedure(filtered_boards, filtered_depths)
         else:
-            print("❓ Invalid command. Try again.\n")
+            print("Invalid command. Try again.\n")
