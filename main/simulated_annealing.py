@@ -162,11 +162,11 @@ solver.print_board()
 print(solver.status_message)
 
 # Validation only if solve was successful
-if success:
-    if compare_boards(solver.board, correct_board):
-        print("Final board matches the known correct solution.")
-    else:
-        print("Final board does NOT match the known correct solution.")
+if compare_boards(solver.board, correct_board):
+    print("✅ Final board matches the known correct solution.")
+else:
+    print("❌ Final board does NOT match the known correct solution.")
 
-    matches, percentage = closeness_score(solver.board, correct_board)
-    print("Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
+matches, percentage = closeness_score(solver.board, correct_board)
+print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
+
