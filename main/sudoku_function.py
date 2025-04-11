@@ -48,7 +48,7 @@ def print_sudoku_result(board: list):
     print("\n          FINAL RESULT\n")
 
 
-def show_procedure(board_list: list, depth_list: list):
+def show_procedure(board_list: list, depth_list: list = None):
     depth_flag = None != depth_list
 
     # get difference between two boards
@@ -67,7 +67,7 @@ def show_procedure(board_list: list, depth_list: list):
     for start in range(0, total_step, step):
         end = min(start + step, total_step)
         boards = board_list[start:end]
-        depths = depth_list[start:end]
+        depths = depth_list[start:end] if depth_flag else None
         diffs = []
 
         # get differences between previous and current boards
@@ -108,9 +108,12 @@ def show_procedure(board_list: list, depth_list: list):
                 print()
 
         # print depths below each board
-        for b_idx, depth in enumerate(depths):
-            print(f"          depth {depth:<2}                ", end="     " if depth_flag else "")
-        print("\n")
+        if depth_flag:
+            for b_idx, depth in enumerate(depths):
+                print(f"          depth {depth:<2}                ", end="     ")
+            print("\n")
+        else:
+            print("")
 
         # input prompt to continue or skip
         if end < total_step:
