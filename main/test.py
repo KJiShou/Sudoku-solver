@@ -1,3 +1,4 @@
+
 import time
 import tracemalloc
 from copy import deepcopy
@@ -18,6 +19,7 @@ def is_valid(board: list, num: int, row: int, col: int) -> bool:
             if board[start_row + i][start_col + j] == num:
                 return False
     return True
+
 
 
 def animate_solving():
