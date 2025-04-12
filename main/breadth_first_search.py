@@ -1,23 +1,35 @@
 import copy
 import time
 import tracemalloc
+import sudoku_function as sf
 from collections import deque
 
-# Sudoku utility functions
-def print_board(board):
-    print("\n" + "-" * 25)
+# Tidy board printing with highlighted changes
+def print_board_tidy(board, prev_board=None):
+    print("-" * 49)
     for i in range(9):
         row = ""
         for j in range(9):
             if j % 3 == 0:
                 row += "| "
-            cell = board[i][j]
-            row += (str(cell) if cell != 0 else " ") + " "
+            num = board[i][j]
+            if prev_board and prev_board[i][j] != num:
+                if num == 0:
+                    cell = "     "
+                else:
+                    cell = f"*{num}*".center(5)
+            else:
+                if num == 0:
+                    cell = "     "
+                else:
+                    cell = f"{num}".center(5)
+            row += cell
         row += "|"
         print(row)
         if (i + 1) % 3 == 0:
-            print("-" * 25)
+            print("-" * 49)
 
+# Find next empty cell
 def find_empty_cell(board):
     for i in range(9):
         for j in range(9):
@@ -25,6 +37,7 @@ def find_empty_cell(board):
                 return i, j
     return None
 
+# Check validity
 def is_valid(board, row, col, num):
     if num in board[row]:
         return False
@@ -38,24 +51,31 @@ def is_valid(board, row, col, num):
                 return False
     return True
 
-# Main BFS Solver
+# BFS Sudoku Solver
 def bfs_sudoku_solver(board, mode):
     start_time = time.time()
     tracemalloc.start()
 
-    queue = deque([board])
+    queue = deque([(board, 0)])  # (board, breadth level)
     step = 0
     enter_press_count = 0
     skip_to_end = False
     enter_limit_before_skip_prompt = 5
+    visited = set()
+
+    path_list = []         # Store board states
+    breadth_levels = []    # Store corresponding breadth levels
 
     while queue:
-        current_board = queue.popleft()
+        current_board, breadth = queue.popleft()
         step += 1
 
+        path_list.append(copy.deepcopy(current_board))
+        breadth_levels.append(breadth)
+
         if mode == 1 and not skip_to_end:
-            print(f"\nStep {step}")
-            print_board(current_board)
+            print(f"\nStep {step} | Breadth Level {breadth}")
+            print_board_tidy(current_board, prev_board=None if step == 1 else prev_board)
             input("Press Enter to continue...")
             enter_press_count += 1
 
@@ -65,9 +85,9 @@ def bfs_sudoku_solver(board, mode):
                     skip_to_end = True
 
         elif mode == 2:
-            print(f"\nStep {step}")
-            print_board(current_board)
-            time.sleep(0.1)
+            print(f"\nStep {step} | Breadth Level {breadth}")
+            print_board_tidy(current_board, prev_board=None if step == 1 else prev_board)
+            time.sleep(0.05)
 
         empty_cell = find_empty_cell(current_board)
         if not empty_cell:
@@ -76,33 +96,37 @@ def bfs_sudoku_solver(board, mode):
             tracemalloc.stop()
 
             print("\nSudoku Solved! Final board:")
-            print_board(current_board)
+            print_board_tidy(current_board)
             print(f"\nTotal steps: {step}")
+            print(f"Final breadth level: {breadth}")
             print(f"Time taken: {end_time - start_time:.4f} seconds")
             print(f"Peak memory usage: {peak / (1024 * 1024):.2f} MB")
-            return current_board
+
+            # Return final board, full path, and levels
+            return current_board, path_list, breadth_levels
 
         row, col = empty_cell
+        prev_board = current_board
         for num in range(1, 10):
             if is_valid(current_board, row, col, num):
                 new_board = copy.deepcopy(current_board)
                 new_board[row][col] = num
-                queue.append(new_board)
+                queue.append((new_board, breadth + 1))
 
     print("\nNo solution found.")
-    return None
+    return None, path_list, breadth_levels
 
-# Sample board
+# Sample Sudoku board
 sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    [5, 1, 6, 8, 4, 9, 7, 3, 2],
+    [3, 0, 7, 6, 0, 5, 0, 0, 0],
+    [8, 0, 9, 7, 0, 0, 0, 6, 5],
+    [1, 3, 5, 0, 6, 0, 9, 0, 7],
+    [4, 7, 2, 5, 9, 1, 0, 0, 6],
+    [9, 6, 8, 3, 7, 0, 5, 0, 0],
+    [2, 5, 3, 1, 8, 6, 0, 7, 4],
+    [6, 8, 4, 2, 0, 7, 0, 5, 0],
+    [7, 9, 1, 0, 5, 0, 6, 0, 8]
 ]
 
 # Mode selection
@@ -121,4 +145,14 @@ while True:
     except ValueError:
         print("Invalid input. Try again.")
 
-bfs_sudoku_solver(sudoku_board, mode)
+if mode == 3:
+    mode = 0  # For skipping to final
+
+# Run solver and store the full path
+solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board, mode)
+sf.show_procedure(path_list, breadth_levels)
+
+# Optional: print path afterwards
+# for idx, (b, lvl) in enumerate(zip(path_list, breadth_levels), 1):
+#     print(f"\nStep {idx} | Breadth Level {lvl}")
+#     print_board_tidy(b)
