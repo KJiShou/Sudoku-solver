@@ -4,6 +4,11 @@ from copy import deepcopy
 import threading
 import iterative_deepening_search as ids
 
+# import a_search as ass
+# import backtracking_search as bs
+# import simulated_annealing as sa
+# import breadth_first_search as bfs
+
 # Animation thread flag
 solving = True
 
@@ -31,10 +36,12 @@ def animate_solving():
 
 
 # function to print sudoku board
-def print_sudoku_result(board: list):
+def print_sudoku_result(board: list, time_taken: float, peak_memory: float):
     print("\n" * 5)
     if board is None:
         print("Cannot Find the result!")
+        print(f"Memory Usage: {peak_memory / (1024 * 1024):.2f} MB")
+        print(f"Time Usage  : {time_taken:.6f} seconds\n")
         return
     for row in range(9):
         for col in range(9):
@@ -46,11 +53,13 @@ def print_sudoku_result(board: list):
         if row % 3 == 2 and row != 8:
             print("- " * 17)
     print("\n          FINAL RESULT\n")
+    print(f"Memory Usage: {peak_memory / (1024 * 1024):.2f} MB")
+    print(f"Time Usage  : {time_taken:.6f} seconds\n")
 
 
 def show_procedure(board_list: list, depth_list: list = None):
     depth_flag = None != depth_list
-
+    skip_flag = False
     # get difference between two boards
     def get_diff(prev, curr):
         diff = set()
@@ -115,15 +124,42 @@ def show_procedure(board_list: list, depth_list: list = None):
         else:
             print("")
 
+
         # input prompt to continue or skip
-        if end < total_step:
+        if not skip_flag and end < total_step:
             choice = input(
                 f"Showing steps {start + 1}-{end} of {total_step}. Press Enter to continue, or 'y' to skip to last step: ")
             if choice.strip().lower() == 'y':
-                break
+                skip_flag = True
 
     print(f"\nFinished showing all {total_step} steps.\nReturning to menu...\n")
 
+
+# tract memory and time function
+def trace_function(algorithm, test_data: list):
+    # Start animation
+    global solving
+    solving = True
+    anim_thread = threading.Thread(target=animate_solving)
+    anim_thread.start()
+
+    # Start tracking
+    tracemalloc.start()
+    start_time = time.time()
+
+    solution, process, depth_log, limit_log = algorithm(test_data)
+
+    # Stop animation
+    solving = False
+    anim_thread.join()
+    print("\rDone !                            ")
+
+    end_time = time.time()
+    time_taken = end_time - start_time
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    return solution, process, depth_log, limit_log, time_taken, peak
 
 if __name__ == "__main__":
     # test data 1, easiest
@@ -253,26 +289,8 @@ if __name__ == "__main__":
         [7, 9, 1, 0, 5, 0, 6, 0, 8]
     ]
 
-    # Start animation
-    solving = True
-    anim_thread = threading.Thread(target=animate_solving)
-    anim_thread.start()
-
-    # Start tracking
-    tracemalloc.start()
-    start_time = time.time()
-
-    solution, process, depth_log, limit_log = ids.iterative_deepening(sudoku_test_data_10)
-
-    # Stop animation
-    solving = False
-    anim_thread.join()
-    print("\rDone !                            ")
-
-    end_time = time.time()
-    time_taken = end_time - start_time
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    solution, process, depth_log, limit_log, time_taken, peak = trace_function(ids.iterative_deepening,
+                                                                               sudoku_test_data_10)
 
     print(f"\nSudoku Solved!")
     print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
@@ -291,7 +309,7 @@ if __name__ == "__main__":
             print("Exiting. Goodbye!")
             break
         elif cmd == 'result':
-            print_sudoku_result(solution)
+            print_sudoku_result(solution, time_taken, peak)
         elif cmd.isdigit():
             depth_choice = int(cmd)
             filtered_boards = []
