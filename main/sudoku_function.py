@@ -97,8 +97,11 @@ def show_procedure(board_list: list, depth_list: list = None):
                     if col % 3 == 0 and col != 0:
                         print(" | ", end="")
                     val = board[row][col]
-                    if (row, col) in diffs[b_idx] and val != 0:
-                        print(f"*{val}*", end="")
+                    if (row, col) in diffs[b_idx]:
+                        if val == 0:
+                            print(f" < ", end="")
+                        else:
+                            print(f"*{val}*", end="")
                     else:
                         print(f" {val if val != 0 else ' '} ", end="")
 
