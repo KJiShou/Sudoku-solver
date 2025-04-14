@@ -2,6 +2,10 @@ import time
 import tracemalloc
 from copy import deepcopy
 
+# TODO: record depth_log
+# TODO: backtracking func -> solution, process, depth_log, None
+# TODO: import sudoku_function and use show_process func
+
 solving = True
 display_final = False
 
