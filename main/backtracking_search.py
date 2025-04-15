@@ -2,8 +2,7 @@ import time
 import tracemalloc
 from copy import deepcopy
 
-solving = True
-display_final = False
+# ======= Utility Functions =======
 
 def is_valid(board: list, num: int, row: int, col: int) -> bool:
     for i in range(9):
@@ -17,7 +16,7 @@ def is_valid(board: list, num: int, row: int, col: int) -> bool:
     return True
 
 def print_sudoku(board: list, highlight=None):
-    print("\n" * 2)
+    print("\n" * 1)
     for row in range(9):
         row_str = ""
         for col in range(9):
@@ -40,56 +39,129 @@ def find_empty(board):
                 return i, j
     return None
 
-def user_continue():
-    global display_final
-    user_input = input("Press Enter or enter '1' skip to final result : ")
-    if user_input.strip() == '1':
-        display_final = True
+# ======= Backtracking Solver =======
 
-def backtrack(board, process):
-    global display_final
-    empty = find_empty(board)
-    if not empty:
-        return True  # Solved
-    row, col = empty
-    for num in range(1, 10):
-        if is_valid(board, num, row, col):
-            board[row][col] = num
-            process.append((deepcopy(board), [(row, col)]))
-            if not display_final:
-                print_sudoku(board, [(row, col)])
-                print(f"\nTrying number '{num}' at cell ({row}, {col}) \n")
-                user_continue()
-            if backtrack(board, process):
-                return True
-            board[row][col] = 0  # Backtrack
-            process.append((deepcopy(board), [(row, col)]))
-            if not display_final:
-                print_sudoku(board, [(row, col)])
-                print(f"\nBacktracking, removing number '{num}' from cell ({row}, {col}) \n")
-                user_continue()
-    return False
+def solve_sudoku_with_logging(board):
+    process = []
+    depth_log = []
+    path = []
+
+    board_copy = deepcopy(board)
+    process.append((deepcopy(board_copy), []))  # Initial state, depth 0
+    depth_log.append(0)
+
+    def backtrack(board, depth):
+        empty = find_empty(board)
+        if not empty:
+            return True
+        row, col = empty
+        for num in range(1, 10):
+            if is_valid(board, num, row, col):
+                board[row][col] = num
+                path.append((row, col))
+                process.append((deepcopy(board), [(row, col)]))
+                depth_log.append(depth + 1)
+
+                if backtrack(board, depth + 1):
+                    return True
+
+                board[row][col] = 0
+                path.pop()
+                process.append((deepcopy(board), [(row, col)]))
+                depth_log.append(depth + 1)
+        return False
+
+# ======= need checking ========
+    solved = backtrack(board_copy, 0)
+    return (board_copy if solved else None), process, depth_log, path, None
+
+# ======= Menu & Display =======
+
+def menu_after_solving(process, depth_log, solution):
+    step = 0
+    enter_limit = 5
+    enter_count = 0
+    skip = False
+
+    print("\n=== View Options ===")
+    print("1. Manual step-by-step (press Enter)")
+    print("2. Auto show all steps")
+    print("3. Final result only")
+    print("4. Exit")
+    
+    while True:
+        choice = input("Choose mode (1/2/3/4): ").strip()
+        if choice in ('1', '2', '3', '4'):
+            break
+        print("Invalid choice.")
+
+    if choice == '4':
+        print("Exiting viewer. Goodbye!")
+        return
+
+    elif choice == '1':
+        for (board, highlight), depth in zip(process, depth_log):
+            step += 1
+            print(f"\nStep {step} | Depth: {depth}")
+            print_sudoku(board, highlight)
+            input("Press Enter to continue...")
+            enter_count += 1
+            if enter_count % enter_limit == 0:
+                ans = input("Skip to final result? (y/n): ").lower()
+                if ans == 'y':
+                    skip = True
+            if skip:
+                break
+
+        print(f"\nFinal Solved Board (Depth: {depth_log[-1]}):")
+        print_sudoku(solution)
+
+    elif choice == '2':
+        for step, ((board, highlight), depth) in enumerate(zip(process, depth_log), 1):
+            print(f"\nStep {step} | Depth: {depth}")
+            print_sudoku(board, highlight)
+            time.sleep(0.05)
+
+        print(f"\nFinal Solved Board (Depth: {depth_log[-1]}):")
+        print_sudoku(solution)
+
+    else:
+        print(f"\nFinal Solved Board (Depth: {depth_log[-1]}):")
+        print_sudoku(solution)
+        print(f"Max Depth Level: {max(depth_log)}")
+        print(f"Steps Taken: {len(process)}")
+
+# ======= Main Program =======
 
 if __name__ == "__main__":
     sudoku_data = [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        [0, 0, 0, 2, 6, 0, 7, 0, 1],
+        [6, 8, 0, 0, 7, 0, 0, 9, 0],
+        [1, 9, 0, 0, 0, 4, 5, 0, 0],
+        [8, 2, 0, 1, 0, 0, 0, 4, 0],
+        [0, 0, 4, 6, 0, 2, 9, 0, 0],
+        [0, 5, 0, 0, 0, 3, 0, 2, 8],
+        [0, 0, 9, 3, 0, 0, 0, 7, 4],
+        [0, 4, 0, 0, 5, 0, 0, 3, 6],
+        [7, 0, 3, 0, 1, 8, 0, 0, 0]
     ]
-    process = []
+
+    print("\nSolving Sudoku with Backtracking...\n")
     tracemalloc.start()
-    start_time = time.time()
-    backtrack(sudoku_data, process)
-    end_time = time.time()
-    _, peak = tracemalloc.get_traced_memory()
+    start = time.time()
+
+    solution, process, depth_log, path, _ = solve_sudoku_with_logging(sudoku_data)
+
+    end = time.time()
+    current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    print("\n✅ Sudoku Solved!")
-    print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
-    print(f"📊 Time Usage  : {end_time - start_time:.6f} seconds\n")
-    print_sudoku(sudoku_data)
+
+    if solution:
+        print(f"\nSudoku Solved!\n")
+        print(f"Max Depth Level: {max(depth_log)}")
+        print(f"Steps Taken: {len(process)}")
+        print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
+        print(f"Time Usage: {end - start:.4f} s")
+        menu_after_solving(process, depth_log, solution)
+    else:
+        print("Puzzle could not be solved.")

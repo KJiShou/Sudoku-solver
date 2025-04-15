@@ -1,5 +1,4 @@
 import heapq
-import sudoku_function
 
 def is_valid(grid, row, col, num):
     """Checks if placing 'num' at (row, col) is valid."""
@@ -52,7 +51,20 @@ def solve_sudoku_a_star(grid):
 
     return None  # No solution found
 
-solution = sudoku_function.sudoku_solver()
+
+sudoku_grid = [
+    [8, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 3, 6, 0, 0, 0, 0, 0],
+    [0, 7, 0, 0, 9, 0, 2, 0, 0],
+    [0, 5, 0, 0, 0, 7, 0, 0, 0],
+    [0, 0, 0, 0, 4, 5, 7, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 3, 0],
+    [0, 0, 1, 0, 0, 0, 0, 6, 0],
+    [0, 0, 8, 5, 0, 0, 0, 1, 0],
+    [0, 9, 0, 0, 0, 0, 4, 0, 0]
+]
+
+solution = solve_sudoku_a_star(sudoku_grid)
 
 if solution:
     for row in solution:
