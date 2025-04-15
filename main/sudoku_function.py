@@ -3,9 +3,9 @@ import tracemalloc
 from copy import deepcopy
 import threading
 import iterative_deepening_search as ids
+import backtracking_search as bs
 
 # import a_search as ass
-# import backtracking_search as bs
 # import simulated_annealing as sa
 # import breadth_first_search as bfs
 
@@ -56,6 +56,18 @@ def print_sudoku_result(board: list, time_taken: float, peak_memory: float):
     print(f"Memory Usage: {peak_memory / (1024 * 1024):.2f} MB")
     print(f"Time Usage  : {time_taken:.6f} seconds\n")
 
+
+def print_board(board):
+    for row in range(9):
+        for col in range(9):
+            if col % 3 == 0 and col != 0:
+                print(" | ", end="")
+            val = board[row][col]
+            print(f" {val if val != 0 else ' '} ", end="")
+        print()
+        if row % 3 == 2 and row != 8:
+            print("- " * 17)
+    print("\n")
 
 def show_procedure(board_list: list, depth_list: list = None):
     depth_flag = None != depth_list
@@ -126,12 +138,12 @@ def show_procedure(board_list: list, depth_list: list = None):
             print("\n")
         else:
             print("")
-
+        print(f"Showing steps {start + 1}-{end} of {total_step}.")
 
         # input prompt to continue or skip
         if not skip_flag and end < total_step:
             choice = input(
-                f"Showing steps {start + 1}-{end} of {total_step}. Press Enter to continue, or 'y' to skip to last step: ")
+                f"Press Enter to continue, or 'y' to skip to last step: ")
             if choice.strip().lower() == 'y':
                 skip_flag = True
 
@@ -164,168 +176,262 @@ def trace_function(algorithm, test_data: list):
 
     return solution, process, depth_log, limit_log, time_taken, peak
 
+
+def display_menu(title, options):
+    print(f"\n{title}")
+    print("=" * len(title))
+    for idx, option in enumerate(options, start=1):
+        print(f"{idx}. {option}")
+    print("0. Exit")
+    print("=" * len(title))
+
 if __name__ == "__main__":
     # test data 1, easiest
-    sudoku_test_data_1 = [
-        [0, 0, 0, 2, 6, 0, 7, 0, 1],
-        [6, 8, 0, 0, 7, 0, 0, 9, 0],
-        [1, 9, 0, 0, 0, 4, 5, 0, 0],
-        [8, 2, 0, 1, 0, 0, 0, 4, 0],
-        [0, 0, 4, 6, 0, 2, 9, 0, 0],
-        [0, 5, 0, 0, 0, 3, 0, 2, 8],
-        [0, 0, 9, 3, 0, 0, 0, 7, 4],
-        [0, 4, 0, 0, 5, 0, 0, 3, 6],
-        [7, 0, 3, 0, 1, 8, 0, 0, 0]
+    sudoku_test_data = [
+        # easy 1
+        [
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0]
+        ],
+        # easy 2
+        [
+            [1, 0, 0, 4, 8, 9, 0, 0, 6],
+            [7, 3, 0, 0, 0, 0, 0, 4, 0],
+            [0, 0, 0, 0, 0, 1, 2, 9, 5],
+            [0, 0, 7, 1, 2, 0, 6, 0, 0],
+            [5, 0, 0, 7, 0, 3, 0, 0, 8],
+            [0, 0, 6, 0, 9, 5, 7, 0, 0],
+            [9, 1, 4, 6, 0, 0, 0, 0, 0],
+            [0, 2, 0, 0, 0, 0, 0, 3, 7],
+            [8, 0, 0, 5, 1, 2, 0, 0, 4]
+        ],
+        # Intermediate 3
+        [
+            [0, 2, 0, 6, 0, 8, 0, 0, 0],
+            [5, 8, 0, 0, 0, 9, 7, 0, 0],
+            [0, 0, 0, 0, 4, 0, 0, 0, 0],
+            [3, 7, 0, 0, 0, 0, 5, 0, 0],
+            [6, 0, 0, 0, 0, 0, 0, 0, 4],
+            [0, 0, 8, 0, 0, 0, 0, 1, 3],
+            [0, 0, 0, 0, 2, 0, 0, 0, 0],
+            [0, 0, 9, 8, 0, 0, 0, 3, 6],
+            [0, 0, 0, 3, 0, 6, 0, 9, 0]
+        ],
+        # Difficult 4
+        [
+            [0, 0, 0, 6, 0, 0, 4, 0, 0],
+            [7, 0, 0, 0, 0, 3, 6, 0, 0],
+            [0, 0, 0, 0, 9, 1, 0, 8, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 5, 0, 1, 8, 0, 0, 0, 3],
+            [0, 0, 0, 3, 0, 6, 0, 4, 5],
+            [0, 4, 0, 2, 0, 0, 0, 6, 0],
+            [9, 0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 2, 0, 0, 0, 0, 1, 0, 0]
+        ],
+        # Difficult 5
+        [
+            [2, 0, 0, 3, 0, 0, 0, 0, 0],
+            [8, 0, 4, 0, 6, 2, 0, 0, 3],
+            [0, 1, 3, 8, 0, 0, 2, 0, 0],
+            [0, 0, 0, 0, 2, 0, 3, 9, 0],
+            [5, 0, 7, 0, 0, 0, 6, 2, 1],
+            [0, 3, 2, 0, 0, 6, 0, 0, 0],
+            [0, 2, 0, 0, 0, 9, 1, 4, 0],
+            [6, 0, 1, 2, 5, 0, 8, 0, 9],
+            [0, 0, 0, 0, 0, 1, 0, 0, 2]
+        ],
+        # Not Fun 6
+        [
+            [0, 2, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0, 3],
+            [0, 7, 4, 0, 8, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 3, 0, 0, 2],
+            [0, 8, 0, 0, 4, 0, 0, 1, 0],
+            [6, 0, 0, 5, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 7, 8, 0],
+            [5, 0, 0, 0, 0, 9, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 4, 0]
+        ],
+        # Extreme 7
+        [
+            [5, 0, 0, 4, 0, 0, 1, 0, 0],
+            [3, 0, 0, 0, 0, 5, 0, 0, 7],
+            [0, 9, 0, 0, 0, 3, 5, 0, 0],
+            [2, 0, 0, 7, 0, 0, 0, 0, 0],
+            [0, 0, 4, 0, 0, 8, 0, 0, 0],
+            [6, 0, 0, 0, 0, 0, 0, 0, 9],
+            [0, 0, 6, 0, 0, 0, 4, 0, 0],
+            [0, 0, 1, 0, 0, 9, 2, 0, 0],
+            [4, 0, 0, 0, 5, 0, 0, 8, 0]
+        ],
+        # Extreme 8
+        [
+            [0, 9, 3, 4, 7, 0, 0, 6, 0],
+            [0, 8, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0, 1],
+            [8, 0, 0, 0, 0, 0, 0, 3, 0],
+            [0, 3, 4, 0, 0, 9, 0, 0, 5],
+            [1, 0, 0, 0, 4, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 5, 2, 0, 0],
+            [0, 6, 7, 0, 9, 0, 0, 1, 0],
+            [4, 0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        # world hardest sudoku 9
+        [
+            [8, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 3, 6, 0, 0, 0, 0, 0],
+            [0, 7, 0, 0, 9, 0, 2, 0, 0],
+            [0, 5, 0, 0, 0, 7, 0, 0, 0],
+            [0, 0, 0, 0, 4, 5, 7, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 3, 0],
+            [0, 0, 1, 0, 0, 0, 0, 6, 0],
+            [0, 0, 8, 5, 0, 0, 0, 1, 0],
+            [0, 9, 0, 0, 0, 0, 4, 0, 0]
+        ],
+        # cannot been solved 10
+        [
+            [5, 1, 6, 8, 4, 9, 7, 3, 2],
+            [3, 0, 7, 6, 0, 5, 0, 0, 0],
+            [8, 0, 9, 7, 0, 0, 0, 6, 5],
+            [1, 3, 5, 0, 6, 0, 9, 0, 7],
+            [4, 7, 2, 5, 9, 1, 0, 0, 6],
+            [9, 6, 8, 3, 7, 0, 5, 0, 0],
+            [2, 5, 3, 1, 8, 6, 0, 7, 4],
+            [6, 8, 4, 2, 0, 7, 0, 5, 0],
+            [7, 9, 1, 0, 5, 0, 6, 0, 8]
+        ]
     ]
 
-    sudoku_test_data_2 = [
-        [1, 0, 0, 4, 8, 9, 0, 0, 6],
-        [7, 3, 0, 0, 0, 0, 0, 4, 0],
-        [0, 0, 0, 0, 0, 1, 2, 9, 5],
-        [0, 0, 7, 1, 2, 0, 6, 0, 0],
-        [5, 0, 0, 7, 0, 3, 0, 0, 8],
-        [0, 0, 6, 0, 9, 5, 7, 0, 0],
-        [9, 1, 4, 6, 0, 0, 0, 0, 0],
-        [0, 2, 0, 0, 0, 0, 0, 3, 7],
-        [8, 0, 0, 5, 1, 2, 0, 0, 4]
-    ]
+    algorithms_function = [ids.iterative_deepening, bs.solve_sudoku_with_logging, ids.iterative_deepening,
+                           ids.iterative_deepening, ids.iterative_deepening]
 
-    # Intermediate
-    sudoku_test_data_3 = [
-        [0, 2, 0, 6, 0, 8, 0, 0, 0],
-        [5, 8, 0, 0, 0, 9, 7, 0, 0],
-        [0, 0, 0, 0, 4, 0, 0, 0, 0],
-        [3, 7, 0, 0, 0, 0, 5, 0, 0],
-        [6, 0, 0, 0, 0, 0, 0, 0, 4],
-        [0, 0, 8, 0, 0, 0, 0, 1, 3],
-        [0, 0, 0, 0, 2, 0, 0, 0, 0],
-        [0, 0, 9, 8, 0, 0, 0, 3, 6],
-        [0, 0, 0, 3, 0, 6, 0, 9, 0]
-    ]
+    exit_flag = False
+    sudoku_data = 0
+    algorithm_function = ids.iterative_deepening
 
-    # Difficult
-    sudoku_test_data_4 = [
-        [0, 0, 0, 6, 0, 0, 4, 0, 0],
-        [7, 0, 0, 0, 0, 3, 6, 0, 0],
-        [0, 0, 0, 0, 9, 1, 0, 8, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 5, 0, 1, 8, 0, 0, 0, 3],
-        [0, 0, 0, 3, 0, 6, 0, 4, 5],
-        [0, 4, 0, 2, 0, 0, 0, 6, 0],
-        [9, 0, 3, 0, 0, 0, 0, 0, 0],
-        [0, 2, 0, 0, 0, 0, 1, 0, 0]
-    ]
+    while not exit_flag:
+        display_menu("Sudoku Solver", ["Select Data Set", "Choose Algorithm", "Solve Sudoku"])
+        cmd = input("Enter your choice: ")
 
-    sudoku_test_data_5 = [
-        [2, 0, 0, 3, 0, 0, 0, 0, 0],
-        [8, 0, 4, 0, 6, 2, 0, 0, 3],
-        [0, 1, 3, 8, 0, 0, 2, 0, 0],
-        [0, 0, 0, 0, 2, 0, 3, 9, 0],
-        [5, 0, 7, 0, 0, 0, 6, 2, 1],
-        [0, 3, 2, 0, 0, 6, 0, 0, 0],
-        [0, 2, 0, 0, 0, 9, 1, 4, 0],
-        [6, 0, 1, 2, 5, 0, 8, 0, 9],
-        [0, 0, 0, 0, 0, 1, 0, 0, 2]
-    ]
-
-    # Not Fun
-    sudoku_test_data_6 = [
-        [0, 2, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 6, 0, 0, 0, 0, 3],
-        [0, 7, 4, 0, 8, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 3, 0, 0, 2],
-        [0, 8, 0, 0, 4, 0, 0, 1, 0],
-        [6, 0, 0, 5, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 7, 8, 0],
-        [5, 0, 0, 0, 0, 9, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 4, 0]
-    ]
-
-    # Extreme
-    sudoku_test_data_7 = [
-        [5, 0, 0, 4, 0, 0, 1, 0, 0],
-        [3, 0, 0, 0, 0, 5, 0, 0, 7],
-        [0, 9, 0, 0, 0, 3, 5, 0, 0],
-        [2, 0, 0, 7, 0, 0, 0, 0, 0],
-        [0, 0, 4, 0, 0, 8, 0, 0, 0],
-        [6, 0, 0, 0, 0, 0, 0, 0, 9],
-        [0, 0, 6, 0, 0, 0, 4, 0, 0],
-        [0, 0, 1, 0, 0, 9, 2, 0, 0],
-        [4, 0, 0, 0, 5, 0, 0, 8, 0]
-    ]
-
-    sudoku_test_data_8 = [
-        [0, 9, 3, 4, 7, 0, 0, 6, 0],
-        [0, 8, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 6, 0, 0, 0, 0, 1],
-        [8, 0, 0, 0, 0, 0, 0, 3, 0],
-        [0, 3, 4, 0, 0, 9, 0, 0, 5],
-        [1, 0, 0, 0, 4, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 5, 2, 0, 0],
-        [0, 6, 7, 0, 9, 0, 0, 1, 0],
-        [4, 0, 0, 0, 0, 0, 0, 0, 0]
-    ]
-
-    # world hardest sudoku
-    sudoku_test_data_9 = [
-        [8, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 3, 6, 0, 0, 0, 0, 0],
-        [0, 7, 0, 0, 9, 0, 2, 0, 0],
-        [0, 5, 0, 0, 0, 7, 0, 0, 0],
-        [0, 0, 0, 0, 4, 5, 7, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 3, 0],
-        [0, 0, 1, 0, 0, 0, 0, 6, 0],
-        [0, 0, 8, 5, 0, 0, 0, 1, 0],
-        [0, 9, 0, 0, 0, 0, 4, 0, 0]
-    ]
-
-    # cannot been solved
-    sudoku_test_data_10 = [
-        [5, 1, 6, 8, 4, 9, 7, 3, 2],
-        [3, 0, 7, 6, 0, 5, 0, 0, 0],
-        [8, 0, 9, 7, 0, 0, 0, 6, 5],
-        [1, 3, 5, 0, 6, 0, 9, 0, 7],
-        [4, 7, 2, 5, 9, 1, 0, 0, 6],
-        [9, 6, 8, 3, 7, 0, 5, 0, 0],
-        [2, 5, 3, 1, 8, 6, 0, 7, 4],
-        [6, 8, 4, 2, 0, 7, 0, 5, 0],
-        [7, 9, 1, 0, 5, 0, 6, 0, 8]
-    ]
-
-    solution, process, depth_log, limit_log, time_taken, peak = trace_function(ids.iterative_deepening,
-                                                                               sudoku_test_data_10)
-
-    print(f"\nSudoku Solved!")
-    print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
-    print(f"Time Usage  : {time_taken:.6f} seconds\n")
-
-    # Interactive loop
-    while True:
-        print("Options:")
-        print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
-        print("  - Type 'result' to see the final solved board")
-        print("  - Type 'exit' to quit\n")
-
-        cmd = input("What would you like to see? \n").strip().lower()
-
-        if cmd == 'exit':
-            print("Exiting. Goodbye!")
-            break
-        elif cmd == 'result':
-            print_sudoku_result(solution, time_taken, peak)
-        elif cmd.isdigit():
-            depth_choice = int(cmd)
-            filtered_boards = []
-            filtered_depths = []
-            for b, d, l in zip(process, depth_log, limit_log):
-                if l == depth_choice:
-                    filtered_boards.append(b)
-                    filtered_depths.append(d)
-
-            if not filtered_boards:
-                print(f"No steps found for depth {depth_choice}. Try another.\n")
+        if cmd == "1":
+            datasets = [
+                "Easy 1", "Easy 2", "Intermediate 1", "Difficult 1", "Difficult 2",
+                "Difficult 3", "Extreme 1", "Extreme 2", "World Hardest", "Impossible"
+            ]
+            display_menu("Choose Data Set", datasets)
+            choice = input("Enter your choice: ")
+            if choice.isdigit() and 0 <= int(choice) <= 10:
+                if int(choice) == 0:
+                    continue
+                sudoku_data = int(choice) - 1
+                print("\nSelected Sudoku Board:")
+                print_board(sudoku_test_data[sudoku_data])
             else:
-                print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
-                show_procedure(filtered_boards, filtered_depths)
+                print("Invalid choice.\n")
+
+        elif cmd == "2":
+            algorithms = [
+                "A* Search", "Backtracking Search", "Breadth First Search", "Iterative Deepening Search",
+                "Simulated Annealing"
+            ]
+            display_menu("Choose Algorithm", algorithms)
+            algorithms_choice = input("Enter your choice: ")
+            if algorithms_choice.isdigit() and 0 <= int(algorithms_choice) <= 10:
+                if int(algorithms_choice) == 0:
+                    continue
+                algorithm_function = algorithms_function[int(algorithms_choice) - 1]
+                print(f"\nSelected Algorithms: {algorithms[int(algorithms_choice) - 1]}")
+            else:
+                print("Invalid choice.\n")
+
+        elif cmd == "3":
+            print("\nSolving the selected Sudoku puzzle...")
+            solution, process, depth_log, limit_log, time_taken, peak = trace_function(algorithm_function,
+                                                                                       sudoku_test_data[sudoku_data])
+
+            print(f"\nSudoku Solved!")
+            print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
+            print(f"Time Usage  : {time_taken:.6f} seconds\n")
+
+            # Interactive loop
+            while True:
+                # TODO: change the limit log choices based on algorithms
+                print("Options:")
+                print(
+                    f"  - Enter a depth limit (max: {limit_log[-1] if limit_log != None else ''}) to view that step process")
+                print("  - Type 'result' to see the final solved board")
+                print("  - Type 'exit' to quit\n")
+
+                cmd = input("What would you like to see? \n").strip().lower()
+
+                if cmd == 'exit':
+                    print("Exiting. Goodbye!")
+                    break
+                elif cmd == 'result':
+                    print_sudoku_result(solution, time_taken, peak)
+                elif cmd.isdigit():
+                    depth_choice = int(cmd)
+                    filtered_boards = []
+                    filtered_depths = []
+                    for b, d, l in zip(process, depth_log, limit_log):
+                        if l == depth_choice:
+                            filtered_boards.append(b)
+                            filtered_depths.append(d)
+
+                    if not filtered_boards:
+                        print(f"No steps found for depth {depth_choice}. Try another.\n")
+                    else:
+                        print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
+                        show_procedure(filtered_boards, filtered_depths)
+                else:
+                    print("Invalid command. Try again.\n")
+        elif cmd == "0":
+            exit_flag = True
         else:
-            print("Invalid command. Try again.\n")
+            print("Invalid input. Please try again.")
+
+    # solution, process, depth_log, limit_log, time_taken, peak = trace_function(ids.iterative_deepening,
+    #                                                                            sudoku_test_data[9])
+    #
+    # print(f"\nSudoku Solved!")
+    # print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
+    # print(f"Time Usage  : {time_taken:.6f} seconds\n")
+    #
+    # # Interactive loop
+    # while True:
+    #     print("Options:")
+    #     print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
+    #     print("  - Type 'result' to see the final solved board")
+    #     print("  - Type 'exit' to quit\n")
+    #
+    #     cmd = input("What would you like to see? \n").strip().lower()
+    #
+    #     if cmd == 'exit':
+    #         print("Exiting. Goodbye!")
+    #         break
+    #     elif cmd == 'result':
+    #         print_sudoku_result(solution, time_taken, peak)
+    #     elif cmd.isdigit():
+    #         depth_choice = int(cmd)
+    #         filtered_boards = []
+    #         filtered_depths = []
+    #         for b, d, l in zip(process, depth_log, limit_log):
+    #             if l == depth_choice:
+    #                 filtered_boards.append(b)
+    #                 filtered_depths.append(d)
+    #
+    #         if not filtered_boards:
+    #             print(f"No steps found for depth {depth_choice}. Try another.\n")
+    #         else:
+    #             print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
+    #             show_procedure(filtered_boards, filtered_depths)
+    #     else:
+    #         print("Invalid command. Try again.\n")
