@@ -71,6 +71,7 @@ def solve_sudoku_with_logging(board):
                 depth_log.append(depth + 1)
         return False
 
+# ======= need checking ========
     solved = backtrack(board_copy, 0)
     return (board_copy if solved else None), process, depth_log, path, None
 
