@@ -18,7 +18,7 @@ def print_sudoku_step(board: list, prev_board=None):
             else:
                 output += f"{num if num != 0 else ' '} "
         output += "\n"
-    return output
+    print(output, end='', flush=True)
 
 def show_procedure_auto(board_list: list):
     total_step = len(board_list)
@@ -26,7 +26,7 @@ def show_procedure_auto(board_list: list):
         print(f"\nStep {i + 1}:")
         prev_board = board_list[i-1] if i > 0 else None
         print(print_sudoku_step(board_list[i], prev_board))
-        time.sleep(0.1) # Adjust speed if needed
+        time.sleep(0.5) # Adjust speed if needed
 
 def is_valid(board, row, col, num):
     """Checks if placing 'num' at (row, col) is valid."""
@@ -114,7 +114,12 @@ if __name__ == "__main__":
 
     print("A* Sudoku Solver")
     while True:
-        choice = input("Select an option:\n1. Show only the final result\n2. Show all steps (press Enter)\n3. Show all steps (automatic)\n4. Exit\nEnter your choice: ")
+        choice = input("Select an option:\n"
+                       " 1.  Show final result\n"
+                       " 2.  Step by step\n"
+                       " 3.  Show all steps automatically\n"
+                       " 00. Exit\n"
+                       "  Enter your choice: ")
         if choice == '1':
             solved_board, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
@@ -128,7 +133,7 @@ if __name__ == "__main__":
             if solved_board:
                 print("\nSolving Steps:")
                 func.show_procedure(path)
-                print("\nFinal Solved Board (already shown step-by-step):")
+                print("\nFinal Solved Board:")
                 print_sudoku_step(solved_board)
             else:
                 print("No solution found.")
@@ -136,15 +141,15 @@ if __name__ == "__main__":
         elif choice == '3':
             solved_board, path = solve_sudoku_a_star(sudoku_board)
             if solved_board:
-                print("\nSolving Steps (Automatic):")
+                print("\nSolving Steps:")
                 show_procedure_auto(path)
                 print("\nFinal Solved Board:")
                 print_sudoku_step(solved_board)
             else:
                 print("No solution found.")
             break
-        elif choice == '4':
+        elif choice == '00':
             print("Exiting.")
             break
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.")
+            print("Invalid choice. Please enter 1, 2, 3, or 00.")
