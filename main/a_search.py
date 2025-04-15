@@ -18,7 +18,7 @@ def print_sudoku_step(board: list, prev_board=None):
             else:
                 output += f"{num if num != 0 else ' '} "
         output += "\n"
-    print(output, end='', flush=True)
+    return output
 
 def show_procedure_auto(board_list: list):
     total_step = len(board_list)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             solved_board, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nFinal Solved Board:")
-                print_sudoku_step(solved_board)
+                print(print_sudoku_step(solved_board))
             else:
                 print("No solution found.")
             break
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 print("\nSolving Steps:")
                 func.show_procedure(path)
                 print("\nFinal Solved Board:")
-                print_sudoku_step(solved_board)
+                print(print_sudoku_step(solved_board))
             else:
                 print("No solution found.")
             break
@@ -144,7 +144,7 @@ if __name__ == "__main__":
                 print("\nSolving Steps:")
                 show_procedure_auto(path)
                 print("\nFinal Solved Board:")
-                print_sudoku_step(solved_board)
+                print(print_sudoku_step(solved_board))
             else:
                 print("No solution found.")
             break
