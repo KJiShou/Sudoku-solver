@@ -44,7 +44,6 @@ def find_empty(board):
 def solve_sudoku_with_logging(board):
     process = []
     depth_log = []
-    path = []
 
     board_copy = deepcopy(board)
     process.append((deepcopy(board_copy), []))  # Initial state, depth 0
@@ -58,22 +57,20 @@ def solve_sudoku_with_logging(board):
         for num in range(1, 10):
             if is_valid(board, num, row, col):
                 board[row][col] = num
-                path.append((row, col))
-                process.append((deepcopy(board), [(row, col)]))
+                process.append((deepcopy(board)))
                 depth_log.append(depth + 1)
 
                 if backtrack(board, depth + 1):
                     return True
 
                 board[row][col] = 0
-                path.pop()
-                process.append((deepcopy(board), [(row, col)]))
+                process.append((deepcopy(board)))
                 depth_log.append(depth + 1)
         return False
 
 # ======= need checking ========
     solved = backtrack(board_copy, 0)
-    return (board_copy if solved else None), process, depth_log, path, None
+    return (board_copy if solved else None), process, depth_log, None
 
 # ======= Menu & Display =======
 
