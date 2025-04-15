@@ -1,73 +1,150 @@
 import heapq
+import time
+import tracemalloc
+from copy import deepcopy
+import sudoku_function as func
 
-def is_valid(grid, row, col, num):
+def print_sudoku_step(board: list, prev_board=None):
+    output = ""
+    for i in range(9):
+        if i % 3 == 0 and i != 0:
+            output += "- - - - - - - - - - -\n"
+        for j in range(9):
+            if j % 3 == 0 and j != 0:
+                output += "| "
+            num = board[i][j]
+            if prev_board and prev_board[i][j] != num and num != 0:
+                output += f"*{num}* "
+            else:
+                output += f"{num if num != 0 else ' '} "
+        output += "\n"
+    return output
+
+def show_procedure_auto(board_list: list):
+    total_step = len(board_list)
+    for i in range(total_step):
+        print(f"\nStep {i + 1}:")
+        prev_board = board_list[i-1] if i > 0 else None
+        print(print_sudoku_step(board_list[i], prev_board))
+        time.sleep(0.1) # Adjust speed if needed
+
+def is_valid(board, row, col, num):
     """Checks if placing 'num' at (row, col) is valid."""
     for i in range(9):
-        if grid[row][i] == num or grid[i][col] == num or \
-                grid[3 * (row // 3) + i // 3][3 * (col // 3) + i % 3] == num:
+        if board[row][i] == num or board[i][col] == num or \
+                board[3 * (row // 3) + i // 3][3 * (col // 3) + i % 3] == num:
             return False
     return True
 
-def find_empty(grid):
-    """Finds the next empty cell (0) in the grid."""
+def find_empty(board):
+    """Finds the next empty cell (0) in the board."""
     for row in range(9):
         for col in range(9):
-            if grid[row][col] == 0:
+            if board[row][col] == 0:
                 return row, col
     return None
 
-def heuristic(grid):
+def heuristic(board):
     """Heuristic: number of empty cells."""
     count = 0
-    for row in grid:
+    for row in board:
         count += row.count(0)
     return count
 
-def solve_sudoku_a_star(grid):
-    """Solves Sudoku using A* search."""
-    initial_state = (heuristic(grid), 0, grid)  # (f, g, grid)
-    open_list = [initial_state]
+def solve_sudoku_a_star(initial_board, show_steps=False):
+    """Solves Sudoku using A* search and optionally shows steps."""
+    tracemalloc.start()
+    start_time = time.time()
+
+    open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]  # (f, g, board, path)
     closed_set = set()
+    solution_path = []
 
     while open_list:
-        f, g, current_grid = heapq.heappop(open_list)
-        grid_tuple = tuple(map(tuple, current_grid))
+        f, g, current_board, path = heapq.heappop(open_list)
+        board_tuple = tuple(map(tuple, current_board))
 
-        if grid_tuple in closed_set:
+        if board_tuple in closed_set:
             continue
-        closed_set.add(grid_tuple)
+        closed_set.add(board_tuple)
 
-        if find_empty(current_grid) is None:
-            return current_grid  # Solution found
+        if find_empty(current_board) is None:
+            end_time = time.time()
+            time_taken = end_time - start_time
+            _, peak = tracemalloc.get_traced_memory()
+            print("\nSudoku Solved (A* Search)! Final board:")
+            print_sudoku_step(current_board)
+            print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
+            print(f"📊 Time Usage  : {time_taken:.6f} seconds")
+            tracemalloc.stop()
+            return current_board, path
 
-        row, col = find_empty(current_grid)
+        row, col = find_empty(current_board)
         for num in range(1, 10):
-            if is_valid(current_grid, row, col, num):
-                new_grid = [row[:] for row in current_grid]
-                new_grid[row][col] = num
-                h = heuristic(new_grid)
-                new_state = (g + 1 + h, g + 1, new_grid)
+            if is_valid(current_board, row, col, num):
+                new_board = deepcopy(current_board)
+                new_board[row][col] = num
+                h = heuristic(new_board)
+                new_path = deepcopy(path)
+                new_path.append(deepcopy(new_board))
+                new_state = (g + 1 + h, g + 1, new_board, new_path)
                 heapq.heappush(open_list, new_state)
 
-    return None  # No solution found
+    end_time = time.time()
+    time_taken = end_time - start_time
+    _, peak = tracemalloc.get_traced_memory()
+    print("\nNo solution found (A* Search).")
+    print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
+    print(f"📊 Time Usage  : {time_taken:.6f} seconds")
+    tracemalloc.stop()
+    return None, []
 
+if __name__ == "__main__":
+    sudoku_board = [
+        [0, 0, 0, 2, 6, 0, 7, 0, 1],
+        [6, 8, 0, 0, 7, 0, 0, 9, 0],
+        [1, 9, 0, 0, 0, 4, 5, 0, 0],
+        [8, 2, 0, 1, 0, 0, 0, 4, 0],
+        [0, 0, 4, 6, 0, 2, 9, 0, 0],
+        [0, 5, 0, 0, 0, 3, 0, 2, 8],
+        [0, 0, 9, 3, 0, 0, 0, 7, 4],
+        [0, 4, 0, 0, 5, 0, 0, 3, 6],
+        [7, 0, 3, 0, 1, 8, 0, 0, 0]
+    ]
 
-sudoku_grid = [
-    [8, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 3, 6, 0, 0, 0, 0, 0],
-    [0, 7, 0, 0, 9, 0, 2, 0, 0],
-    [0, 5, 0, 0, 0, 7, 0, 0, 0],
-    [0, 0, 0, 0, 4, 5, 7, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 3, 0],
-    [0, 0, 1, 0, 0, 0, 0, 6, 0],
-    [0, 0, 8, 5, 0, 0, 0, 1, 0],
-    [0, 9, 0, 0, 0, 0, 4, 0, 0]
-]
-
-solution = solve_sudoku_a_star(sudoku_grid)
-
-if solution:
-    for row in solution:
-        print(row)
-else:
-    print("No solution found.")
+    print("A* Sudoku Solver")
+    while True:
+        choice = input("Select an option:\n1. Show only the final result\n2. Show all steps (press Enter)\n3. Show all steps (automatic)\n4. Exit\nEnter your choice: ")
+        if choice == '1':
+            solved_board, _ = solve_sudoku_a_star(sudoku_board)
+            if solved_board:
+                print("\nFinal Solved Board:")
+                print_sudoku_step(solved_board)
+            else:
+                print("No solution found.")
+            break
+        elif choice == '2':
+            solved_board, path = solve_sudoku_a_star(sudoku_board)
+            if solved_board:
+                print("\nSolving Steps:")
+                func.show_procedure(path)
+                print("\nFinal Solved Board (already shown step-by-step):")
+                print_sudoku_step(solved_board)
+            else:
+                print("No solution found.")
+            break
+        elif choice == '3':
+            solved_board, path = solve_sudoku_a_star(sudoku_board)
+            if solved_board:
+                print("\nSolving Steps (Automatic):")
+                show_procedure_auto(path)
+                print("\nFinal Solved Board:")
+                print_sudoku_step(solved_board)
+            else:
+                print("No solution found.")
+            break
+        elif choice == '4':
+            print("Exiting.")
+            break
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, or 4.")
