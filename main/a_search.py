@@ -4,7 +4,7 @@ import tracemalloc
 from copy import deepcopy
 import sudoku_function as func
 
-def print_sudoku_step(board: list, prev_board=None):
+def print_sudoku_board(board: list):
     output = ""
     for i in range(9):
         if i % 3 == 0 and i != 0:
@@ -13,19 +13,16 @@ def print_sudoku_step(board: list, prev_board=None):
             if j % 3 == 0 and j != 0:
                 output += "| "
             num = board[i][j]
-            if prev_board and prev_board[i][j] != num and num != 0:
-                output += f"*{num}* "
-            else:
-                output += f"{num if num != 0 else ' '} "
+            output += f"{num if num != 0 else ' '} "
         output += "\n"
     return output
 
+# Remove this if unused
 def show_procedure_auto(board_list: list):
     total_step = len(board_list)
     for i in range(total_step):
         print(f"\nStep {i + 1}:")
-        prev_board = board_list[i-1] if i > 0 else None
-        print(print_sudoku_step(board_list[i], prev_board))
+        print(print_sudoku_board(board_list[i]))
         time.sleep(0.5) # Adjust speed if needed
 
 def is_valid(board, row, col, num):
@@ -72,8 +69,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
             end_time = time.time()
             time_taken = end_time - start_time
             _, peak = tracemalloc.get_traced_memory()
-            print("\nSudoku Solved (A* Search)! Final board:")
-            print_sudoku_step(current_board)
+            print("\nSudoku Solved (A* Search)!")
             print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
             print(f"📊 Time Usage  : {time_taken:.6f} seconds")
             tracemalloc.stop()
@@ -112,19 +108,18 @@ if __name__ == "__main__":
         [7, 0, 3, 0, 1, 8, 0, 0, 0]
     ]
 
-    print("A* Sudoku Solver")
     while True:
         choice = input("Select an option:\n"
                        " 1.  Show final result\n"
                        " 2.  Step by step\n"
                        " 3.  Show all steps automatically\n"
-                       " 00. Exit\n"
-                       "  Enter your choice: ")
+                       " 00. Exit\n\n"
+                       " Enter your choice: ")
         if choice == '1':
             solved_board, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nFinal Solved Board:")
-                print(print_sudoku_step(solved_board))
+                print(print_sudoku_board(solved_board))
             else:
                 print("No solution found.")
             break
@@ -134,17 +129,18 @@ if __name__ == "__main__":
                 print("\nSolving Steps:")
                 func.show_procedure(path)
                 print("\nFinal Solved Board:")
-                print(print_sudoku_step(solved_board))
+                print(print_sudoku_board(solved_board))
             else:
                 print("No solution found.")
             break
+        # Printing all steps automatically, remove if necessary
         elif choice == '3':
             solved_board, path = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
                 show_procedure_auto(path)
                 print("\nFinal Solved Board:")
-                print(print_sudoku_step(solved_board))
+                print(print_sudoku_board(solved_board))
             else:
                 print("No solution found.")
             break
