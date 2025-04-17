@@ -103,7 +103,7 @@ def bfs_sudoku_solver(board, mode):
             print(f"Peak memory usage: {peak / (1024 * 1024):.2f} MB")
 
             # Return final board, full path, and levels
-            return current_board, path_list, breadth_levels
+            return current_board, path_list, breadth_levels, None
 
         row, col = empty_cell
         prev_board = current_board
@@ -114,45 +114,46 @@ def bfs_sudoku_solver(board, mode):
                 queue.append((new_board, breadth + 1))
 
     print("\nNo solution found.")
-    return None, path_list, breadth_levels
+    return None, path_list, breadth_levels, None
 
-# Sample Sudoku board
-sudoku_board = [
-    [5, 1, 6, 8, 4, 9, 7, 3, 2],
-    [3, 0, 7, 6, 0, 5, 0, 0, 0],
-    [8, 0, 9, 7, 0, 0, 0, 6, 5],
-    [1, 3, 5, 0, 6, 0, 9, 0, 7],
-    [4, 7, 2, 5, 9, 1, 0, 0, 6],
-    [9, 6, 8, 3, 7, 0, 5, 0, 0],
-    [2, 5, 3, 1, 8, 6, 0, 7, 4],
-    [6, 8, 4, 2, 0, 7, 0, 5, 0],
-    [7, 9, 1, 0, 5, 0, 6, 0, 8]
-]
+if __name__ == "__main__":
+    # Sample Sudoku board
+    sudoku_board = [
+        [5, 1, 6, 8, 4, 9, 7, 3, 2],
+        [3, 0, 7, 6, 0, 5, 0, 0, 0],
+        [8, 0, 9, 7, 0, 0, 0, 6, 5],
+        [1, 3, 5, 0, 6, 0, 9, 0, 7],
+        [4, 7, 2, 5, 9, 1, 0, 0, 6],
+        [9, 6, 8, 3, 7, 0, 5, 0, 0],
+        [2, 5, 3, 1, 8, 6, 0, 7, 4],
+        [6, 8, 4, 2, 0, 7, 0, 5, 0],
+        [7, 9, 1, 0, 5, 0, 6, 0, 8]
+    ]
 
-# Mode selection
-print("Sudoku Solver - Breadth-First Search")
-print("Select mode:")
-print("1. Manual (press Enter for each step)")
-print("2. Auto step-by-step")
-print("3. Direct to final result")
-while True:
-    try:
-        mode = int(input("Enter mode (1/2/3): "))
-        if mode in [1, 2, 3]:
-            break
-        else:
-            print("Please choose 1, 2, or 3.")
-    except ValueError:
-        print("Invalid input. Try again.")
+    # Mode selection
+    print("Sudoku Solver - Breadth-First Search")
+    print("Select mode:")
+    print("1. Manual (press Enter for each step)")
+    print("2. Auto step-by-step")
+    print("3. Direct to final result")
+    while True:
+        try:
+            mode = int(input("Enter mode (1/2/3): "))
+            if mode in [1, 2, 3]:
+                break
+            else:
+                print("Please choose 1, 2, or 3.")
+        except ValueError:
+            print("Invalid input. Try again.")
 
-if mode == 3:
-    mode = 0  # For skipping to final
+    if mode == 3:
+        mode = 0  # For skipping to final
 
-# Run solver and store the full path
-solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board, mode)
-sf.show_procedure(path_list, breadth_levels)
+    # Run solver and store the full path
+    solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board, mode)
+    sf.show_procedure(path_list, breadth_levels)
 
-# Optional: print path afterwards
-# for idx, (b, lvl) in enumerate(zip(path_list, breadth_levels), 1):
-#     print(f"\nStep {idx} | Breadth Level {lvl}")
-#     print_board_tidy(b)
+    # Optional: print path afterwards
+    # for idx, (b, lvl) in enumerate(zip(path_list, breadth_levels), 1):
+    #     print(f"\nStep {idx} | Breadth Level {lvl}")
+    #     print_board_tidy(b)

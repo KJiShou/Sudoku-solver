@@ -4,10 +4,9 @@ from copy import deepcopy
 import threading
 import iterative_deepening_search as ids
 import backtracking_search as bs
-
-# import a_search as ass
-# import simulated_annealing as sa
-# import breadth_first_search as bfs
+import a_search as ass
+import simulated_annealing as sa
+import breadth_first_search as bfs
 
 # Animation thread flag
 solving = True
@@ -152,6 +151,8 @@ def show_procedure(board_list: list, depth_list: list = None):
 
 # tract memory and time function
 def trace_function(algorithm, test_data: list):
+    # TODO: handle simulated_annealing class
+    # TODO: handle all algorithms
     # Start animation
     global solving
     solving = True
@@ -310,8 +311,8 @@ if __name__ == "__main__":
         ]
     ]
 
-    algorithms_function = [ids.iterative_deepening, bs.solve_sudoku_with_logging, ids.iterative_deepening,
-                           ids.iterative_deepening, ids.iterative_deepening]
+    algorithms_function = [ass.solve_sudoku_a_star, bs.solve_sudoku_with_logging, bfs.bfs_sudoku_solver,
+                           ids.iterative_deepening, sa.SimulatedAnnealingSudoku]
 
     exit_flag = False
     sudoku_data = 0
@@ -340,15 +341,18 @@ if __name__ == "__main__":
         elif cmd == "2":
             algorithms = [
                 "A* Search", "Backtracking Search", "Breadth First Search", "Iterative Deepening Search",
-                "Simulated Annealing"
+                "Simulated Annealing", "Compare all algorithms"
             ]
             display_menu("Choose Algorithm", algorithms)
             algorithms_choice = input("Enter your choice: ")
-            if algorithms_choice.isdigit() and 0 <= int(algorithms_choice) <= 10:
+            if algorithms_choice.isdigit() and 0 <= int(algorithms_choice) <= 6:
                 if int(algorithms_choice) == 0:
                     continue
-                algorithm_function = algorithms_function[int(algorithms_choice) - 1]
-                print(f"\nSelected Algorithms: {algorithms[int(algorithms_choice) - 1]}")
+                if int(algorithms_choice) == 6:
+                    algorithms_function = algorithms_function
+                else:
+                    algorithm_function = algorithms_function[int(algorithms_choice) - 1]
+                    print(f"\nSelected Algorithms: {algorithms[int(algorithms_choice) - 1]}")
             else:
                 print("Invalid choice.\n")
 
