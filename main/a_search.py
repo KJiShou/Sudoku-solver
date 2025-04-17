@@ -55,8 +55,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
 
     open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]  # (f, g, board, path)
     closed_set = set()
-    solution_path = []
-
+    path = []
     while open_list:
         f, g, current_board, path = heapq.heappop(open_list)
         board_tuple = tuple(map(tuple, current_board))
@@ -66,14 +65,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
         closed_set.add(board_tuple)
 
         if find_empty(current_board) is None:
-            end_time = time.time()
-            time_taken = end_time - start_time
-            _, peak = tracemalloc.get_traced_memory()
-            print("\nSudoku Solved (A* Search)!")
-            print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
-            print(f"📊 Time Usage  : {time_taken:.6f} seconds")
-            tracemalloc.stop()
-            return current_board, path
+            return current_board, path, None, None
 
         row, col = find_empty(current_board)
         for num in range(1, 10):
@@ -86,14 +78,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
                 new_state = (g + 1 + h, g + 1, new_board, new_path)
                 heapq.heappush(open_list, new_state)
 
-    end_time = time.time()
-    time_taken = end_time - start_time
-    _, peak = tracemalloc.get_traced_memory()
-    print("\nNo solution found (A* Search).")
-    print(f"📊 Memory Usage: {peak / (1024 * 1024):.2f} MB")
-    print(f"📊 Time Usage  : {time_taken:.6f} seconds")
-    tracemalloc.stop()
-    return None, []
+    return None, path, None, None
 
 if __name__ == "__main__":
     sudoku_board = [

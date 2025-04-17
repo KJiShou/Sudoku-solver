@@ -2,6 +2,7 @@ import random
 import math
 import numpy as np
 from copy import deepcopy
+import sudoku_function as sf
 
 class SimulatedAnnealingSudoku:
     def __init__(self, board, initial_temp=1.0, cooling_rate=0.995, max_iter=10000):
@@ -78,33 +79,10 @@ class SimulatedAnnealingSudoku:
         return False
 
     def print_board(self):
-        for i, row in enumerate(self.board):
-            if i % 3 == 0 and i != 0:
-                print("-" * 21)
-            row_str = ""
-            for j, num in enumerate(row):
-                if j % 3 == 0 and j != 0:
-                    row_str += " | "
-                row_str += str(num) if num != 0 else "."
-                row_str += " "
-            print(row_str.strip())
-        print()
+        sf.print_board(self.board)
 
     def print_process(self):
-        print(f"\nTotal Steps Recorded: {len(self.process)}\n")
-        for step_index, step in enumerate(self.process):
-            print(f"Step {step_index + 1}:")
-            for i, row in enumerate(step):
-                if i % 3 == 0 and i != 0:
-                    print("-" * 21)
-                row_str = ""
-                for j, num in enumerate(row):
-                    if j % 3 == 0 and j != 0:
-                        row_str += " | "
-                    row_str += str(num) if num != 0 else "." 
-                    row_str += " "
-                print(row_str.strip())
-            print("------")
+        sf.show_procedure(self.process)
 
 
 def compare_boards(board1, board2):
@@ -119,54 +97,54 @@ def closeness_score(board1, board2):
     percentage = (matches / 81) * 100
     return matches, round(percentage, 2)
 
+if __name__ == "__main__":
+    # Initial Sudoku Board
+    initial_board = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    ]
 
-# Initial Sudoku Board
-initial_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
+    # Known correct solution to validate against
+    correct_board = [
+        [5, 3, 4, 6, 7, 8, 9, 1, 2],
+        [6, 7, 2, 1, 9, 5, 3, 4, 8],
+        [1, 9, 8, 3, 4, 2, 5, 6, 7],
+        [8, 5, 9, 7, 6, 1, 4, 2, 3],
+        [4, 2, 6, 8, 5, 3, 7, 9, 1],
+        [7, 1, 3, 9, 2, 4, 8, 5, 6],
+        [9, 6, 1, 5, 3, 7, 2, 8, 4],
+        [2, 8, 7, 4, 1, 9, 6, 3, 5],
+        [3, 4, 5, 2, 8, 6, 1, 7, 9]
+    ]
 
-# Known correct solution to validate against
-correct_board = [
-    [5, 3, 4, 6, 7, 8, 9, 1, 2],
-    [6, 7, 2, 1, 9, 5, 3, 4, 8],
-    [1, 9, 8, 3, 4, 2, 5, 6, 7],
-    [8, 5, 9, 7, 6, 1, 4, 2, 3],
-    [4, 2, 6, 8, 5, 3, 7, 9, 1],
-    [7, 1, 3, 9, 2, 4, 8, 5, 6],
-    [9, 6, 1, 5, 3, 7, 2, 8, 4],
-    [2, 8, 7, 4, 1, 9, 6, 3, 5],
-    [3, 4, 5, 2, 8, 6, 1, 7, 9]
-]
+    # Solve using SA
+    solver = SimulatedAnnealingSudoku(initial_board)
+    print("Initial Sudoku Board:")
+    solver.print_board()
 
-# Solve using SA
-solver = SimulatedAnnealingSudoku(initial_board)
-print("Initial Sudoku Board:")
-solver.print_board()
+    success = solver.solve()
 
-success = solver.solve()
+    # Always show step history
+    solver.print_process()
 
-# Always show step history
-solver.print_process()
+    # Then show final result + validation
+    print("\nFinal Sudoku Board:")
+    solver.print_board()
+    print(solver.status_message)
 
-# Then show final result + validation
-print("\nFinal Sudoku Board:")
-solver.print_board()
-print(solver.status_message)
+    # Validation only if solve was successful
+    if compare_boards(solver.board, correct_board):
+        print("✅ Final board matches the known correct solution.")
+    else:
+        print("❌ Final board does NOT match the known correct solution.")
 
-# Validation only if solve was successful
-if compare_boards(solver.board, correct_board):
-    print("✅ Final board matches the known correct solution.")
-else:
-    print("❌ Final board does NOT match the known correct solution.")
-
-matches, percentage = closeness_score(solver.board, correct_board)
-print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
+    matches, percentage = closeness_score(solver.board, correct_board)
+    print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
 
