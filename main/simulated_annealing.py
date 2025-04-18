@@ -46,6 +46,22 @@ class SimulatedAnnealingSudoku:
         c1, c2 = random.sample(non_fixed_cells, 2)
         self.board[row][c1], self.board[row][c2] = self.board[row][c2], self.board[row][c1]
 
+    @staticmethod
+    def is_valid_solution(board):
+        for i in range(9):
+            row = board[i, :]
+            col = board[:, i]
+            if len(set(row)) != 9 or len(set(col)) != 9:
+                return False
+
+        for r in range(0, 9, 3):
+            for c in range(0, 9, 3):
+                subgrid = board[r:r + 3, c:c + 3].flatten()
+                if len(set(subgrid)) != 9:
+                    return False
+
+        return True
+
     def solve(self):
         self.generate_random_solution()
         temp = self.initial_temp
@@ -54,9 +70,15 @@ class SimulatedAnnealingSudoku:
 
         for iteration in range(self.max_iter):
             if current_cost == 0:
-                self.status_message = f"Solved in {iteration} iterations!"
-                self.final_iteration = iteration
-                return True
+                if self.is_valid_solution(self.board):
+                    self.status_message = f"Solved in {iteration} iterations!"
+                    self.final_iteration = iteration
+                    return True
+                else:
+                    self.status_message = f"Found invalid board after {iteration} iterations."
+                    self.final_iteration = iteration
+                    self.board = None
+                    return False
 
             old_board = self.board.copy()
             self.swap_random_cells()
@@ -72,6 +94,7 @@ class SimulatedAnnealingSudoku:
             if temp < 0.001:
                 self.status_message = f"Failed after {iteration} iterations."
                 self.final_iteration = iteration
+                self.board = None
                 return False
 
         self.status_message = f"Failed after {self.max_iter} iterations."
