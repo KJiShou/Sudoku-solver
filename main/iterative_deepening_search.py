@@ -12,7 +12,7 @@ def find_empty(board):
     return None
 
 
-def dfs(board, depth, max_depth, process, depth_log, limit_log):
+def dfs(board, depth, max_depth, process, depth_log):
     if depth > max_depth:
         return False
 
@@ -26,10 +26,9 @@ def dfs(board, depth, max_depth, process, depth_log, limit_log):
         if sdk.is_valid(board, num, row, col):
             board[row][col] = num
             process.append(deepcopy(board))
-            limit_log.append(max_depth + 1)
             depth_log.append(depth + 1)
 
-            if dfs(board, depth + 1, max_depth, process, depth_log, limit_log):
+            if dfs(board, depth + 1, max_depth, process, depth_log):
                 return True
 
             board[row][col] = 0  # Backtrack
@@ -40,16 +39,16 @@ def dfs(board, depth, max_depth, process, depth_log, limit_log):
 
 def iterative_deepening(board):
     process = []
-    limit_log = []
     depth_log = []
-    for max_depth in range(0, 81):  # max 81 moves
+
+    empty_cells = sum(row.count(0) for row in board)
+    for max_depth in range(empty_cells, 81):  # max 81 moves
         copied_board = deepcopy(board)
         process.append(deepcopy(board))
-        limit_log.append(max_depth + 1)
         depth_log.append(0)
-        if dfs(copied_board, 0, max_depth, process, depth_log, limit_log):
-            return copied_board, process, depth_log, limit_log
-    return None, process, depth_log, limit_log
+        if dfs(copied_board, 0, max_depth, process, depth_log):
+            return copied_board, process, depth_log
+    return None, process, depth_log
 
 
 if __name__ == "__main__":

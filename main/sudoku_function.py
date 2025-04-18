@@ -170,7 +170,6 @@ def trace_function(algorithm, test_data: list):
         solution = instance.board.tolist() if instance.board is not None else None
         process = instance.process
         depth_log = None
-        limit_log = None
 
     else:
         # Standard functional algorithm
@@ -180,13 +179,11 @@ def trace_function(algorithm, test_data: list):
             solution = result[0] if len(result) > 0 else None
             process = result[1] if len(result) > 1 else []
             depth_log = result[2] if len(result) > 2 else None
-            limit_log = result[3] if len(result) > 3 else None
         else:
             # Single result fallback
             solution = result
             process = []
             depth_log = None
-            limit_log = None
 
     solving = False
     anim_thread.join()
@@ -197,7 +194,7 @@ def trace_function(algorithm, test_data: list):
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
 
-    return solution, process, depth_log, limit_log, time_taken, peak
+    return solution, process, depth_log, time_taken, peak
 
 
 def display_menu(title, options):
@@ -307,7 +304,7 @@ if __name__ == "__main__":
             [0, 6, 7, 0, 9, 0, 0, 1, 0],
             [4, 0, 0, 0, 0, 0, 0, 0, 0]
         ],
-        # world hardest sudoku 9
+        # Extreme 9
         [
             [8, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 3, 6, 0, 0, 0, 0, 0],
@@ -348,7 +345,7 @@ if __name__ == "__main__":
         if cmd == "1":
             datasets = [
                 "Easy 1", "Easy 2", "Intermediate 1", "Difficult 1", "Difficult 2",
-                "Difficult 3", "Extreme 1", "Extreme 2", "World Hardest", "Impossible"
+                "Difficult 3", "Extreme 1", "Extreme 2", "Extreme 3", "Impossible"
             ]
             display_menu("Choose Data Set", datasets)
             choice = input("Enter your choice: ")
@@ -393,7 +390,7 @@ if __name__ == "__main__":
                 for i, alg in enumerate(algorithms_function):
                     print(f"Running {algorithms[i]}...")
                     try:
-                        solution, process, depth_log, limit_log, time_taken, peak = trace_function(
+                        solution, process, depth_log, time_taken, peak = trace_function(
                             alg, sudoku_test_data[sudoku_data]
                         )
                         results.append((solution, time_taken, peak))
@@ -412,15 +409,15 @@ if __name__ == "__main__":
 
                 # Print time and memory usage per algorithm
                 print("\nPerformance Summary:")
-                for i, (_, t, m) in enumerate(results):
+                for i, (s, t, m) in enumerate(results):
                     if t is not None:
-                        print(f"{names[i]:<25} | Time: {t:.4f}s | Memory: {m / (1024 * 1024):.2f} MB")
+                        print(f"{names[i]:<25} | {"  Solved  " if s is not None else "Not Solved"} | Time: {t:.4f}s | Memory: {m / (1024 * 1024):.2f} MB")
                     else:
                         print(f"{names[i]:<25} | Failed to run.")
 
             else:
                 print("\nSolving the selected Sudoku puzzle...")
-                solution, process, depth_log, limit_log, time_taken, peak = trace_function(algorithm_function,
+                solution, process, depth_log, time_taken, peak = trace_function(algorithm_function,
                                                                                            sudoku_test_data[sudoku_data])
 
                 print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
@@ -429,12 +426,7 @@ if __name__ == "__main__":
                 # Interactive loop
                 # Interactive loop
                 while True:
-                    print("Options:")
-                    if limit_log is not None:
-                        print(f"  1. View step process by depth (max depth: {limit_log[-1]})")
-                    else:
-                        print(f"  1. View full solving process")
-
+                    print(f"  1. View full solving process")
                     print("  2. View final solved board")
                     print("  0. Exit\n")
 
@@ -446,68 +438,10 @@ if __name__ == "__main__":
                     elif cmd == '2':
                         print_sudoku_result(solution, time_taken, peak)
                     elif cmd == '1':
-                        if limit_log is None:
-                            show_procedure(process)
-                        else:
-                            depth_choice = input(f"Enter a depth level (0 - {limit_log[-1]}): ").strip()
-                            if depth_choice.isdigit():
-                                depth_choice = int(depth_choice)
-                                filtered_boards = []
-                                filtered_depths = []
-                                for b, d, l in zip(process, depth_log, limit_log):
-                                    if l == depth_choice:
-                                        filtered_boards.append(b)
-                                        filtered_depths.append(d)
-
-                                if not filtered_boards:
-                                    print(f"No steps found for depth {depth_choice}. Try another.\n")
-                                else:
-                                    print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
-                                    show_procedure(filtered_boards, filtered_depths)
-                            else:
-                                print("Invalid input. Please enter a number.\n")
+                        show_procedure(process)
                     else:
                         print("Invalid input. Please enter 0, 1, or 2.\n")
-
         elif cmd == "0":
             exit_flag = True
         else:
             print("Invalid input. Please try again.")
-
-    # solution, process, depth_log, limit_log, time_taken, peak = trace_function(ids.iterative_deepening,
-    #                                                                            sudoku_test_data[9])
-    #
-    # print(f"\nSudoku Solved!")
-    # print(f"Memory Usage: {peak / (1024 * 1024):.2f} MB")
-    # print(f"Time Usage  : {time_taken:.6f} seconds\n")
-    #
-    # # Interactive loop
-    # while True:
-    #     print("Options:")
-    #     print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
-    #     print("  - Type 'result' to see the final solved board")
-    #     print("  - Type 'exit' to quit\n")
-    #
-    #     cmd = input("What would you like to see? \n").strip().lower()
-    #
-    #     if cmd == 'exit':
-    #         print("Exiting. Goodbye!")
-    #         break
-    #     elif cmd == 'result':
-    #         print_sudoku_result(solution, time_taken, peak)
-    #     elif cmd.isdigit():
-    #         depth_choice = int(cmd)
-    #         filtered_boards = []
-    #         filtered_depths = []
-    #         for b, d, l in zip(process, depth_log, limit_log):
-    #             if l == depth_choice:
-    #                 filtered_boards.append(b)
-    #                 filtered_depths.append(d)
-    #
-    #         if not filtered_boards:
-    #             print(f"No steps found for depth {depth_choice}. Try another.\n")
-    #         else:
-    #             print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
-    #             show_procedure(filtered_boards, filtered_depths)
-    #     else:
-    #         print("Invalid command. Try again.\n")

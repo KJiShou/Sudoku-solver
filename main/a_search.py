@@ -104,11 +104,11 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
         closed_set.add(board_tuple)
 
         if heuristic(current_board) == 0 and find_empty(current_board) is None:
-            return current_board, path, None, None
+            return current_board, path, None
 
         empty_cell = find_empty(current_board)
         if empty_cell is None: # Should be caught by the heuristic check above, but for robustness
-            return current_board, path, None, None
+            return current_board, path, None
 
         row, col = empty_cell
         for num in range(1, 10):
@@ -121,7 +121,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
                 new_state = (g + 1 + h, g + 1, new_board, new_path)
                 heapq.heappush(open_list, new_state)
 
-    return None, path, None, None
+    return None, path, None
 
 if __name__ == "__main__":
     sudoku_board = [
