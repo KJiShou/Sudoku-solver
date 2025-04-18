@@ -65,7 +65,7 @@ def bfs_sudoku_solver(board):
 
         empty_cell = find_empty_cell(current_board)
         if not empty_cell:
-            return current_board, path_list, breadth_levels, None
+            return current_board, path_list, breadth_levels
 
         row, col = empty_cell
         for num in range(1, 10):
@@ -74,7 +74,7 @@ def bfs_sudoku_solver(board):
                 new_board[row][col] = num
                 queue.append((new_board, breadth + 1))
 
-    return None, path_list, breadth_levels, None
+    return None, path_list, breadth_levels
 
 if __name__ == "__main__":
     # Sample Sudoku board
