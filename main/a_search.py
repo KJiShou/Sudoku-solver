@@ -17,7 +17,6 @@ def print_sudoku_board(board: list):
         output += "\n"
     return output
 
-# Remove this if unused
 def show_procedure_auto(board_list: list):
     total_step = len(board_list)
     for i in range(total_step):
@@ -26,30 +25,70 @@ def show_procedure_auto(board_list: list):
         time.sleep(0.5) # Adjust speed if needed
 
 def is_valid(board, row, col, num):
-    """Checks if placing 'num' at (row, col) is valid."""
+    """Checks if placing 'num' at (row, col) is valid for that specific cell."""
+    # Check row
+    if num in board[row]:
+        return False
+    # Check column
     for i in range(9):
-        if board[row][i] == num or board[i][col] == num or \
-                board[3 * (row // 3) + i // 3][3 * (col // 3) + i % 3] == num:
+        if board[i][col] == num:
             return False
+    # Check 3x3 box
+    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    for i in range(3):
+        for j in range(3):
+            if board[start_row + i][start_col + j] == num:
+                return False
     return True
 
 def find_empty(board):
-    """Finds the next empty cell (0) in the board."""
+    """Finds the empty cell with the fewest possible valid values."""
+    min_options = float('inf')
+    best_empty = None
     for row in range(9):
         for col in range(9):
             if board[row][col] == 0:
-                return row, col
-    return None
+                options = 0
+                for num in range(1, 10):
+                    if is_valid(board, row, col, num):
+                        options += 1
+                if options < min_options:
+                    min_options = options
+                    best_empty = (row, col)
+    return best_empty
 
 def heuristic(board):
-    """Heuristic: number of empty cells."""
-    count = 0
+    """Heuristic: total number of rule violations in the current grid."""
+    violations = 0
+    # Check rows
     for row in board:
-        count += row.count(0)
-    return count
+        seen = set()
+        for num in row:
+            if num != 0 and num in seen:
+                violations += 1
+            seen.add(num)
+    # Check columns
+    for col in range(9):
+        seen = set()
+        for row in range(9):
+            num = board[row][col]
+            if num != 0 and num in seen:
+                violations += 1
+            seen.add(num)
+    # Check 3x3 blocks
+    for block_row in range(3):
+        for block_col in range(3):
+            seen = set()
+            for i in range(3):
+                for j in range(3):
+                    num = board[3 * block_row + i][3 * block_col + j]
+                    if num != 0 and num in seen:
+                        violations += 1
+                    seen.add(num)
+    return violations
 
 def solve_sudoku_a_star(initial_board, show_steps=False):
-    """Solves Sudoku using A* search and optionally shows steps."""
+    """Solves Sudoku using A* search for selecting the next empty cell."""
     tracemalloc.start()
     start_time = time.time()
 
@@ -64,10 +103,14 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
             continue
         closed_set.add(board_tuple)
 
-        if find_empty(current_board) is None:
+        if heuristic(current_board) == 0 and find_empty(current_board) is None:
             return current_board, path, None, None
 
-        row, col = find_empty(current_board)
+        empty_cell = find_empty(current_board)
+        if empty_cell is None: # Should be caught by the heuristic check above, but for robustness
+            return current_board, path, None, None
+
+        row, col = empty_cell
         for num in range(1, 10):
             if is_valid(current_board, row, col, num):
                 new_board = deepcopy(current_board)
@@ -101,7 +144,7 @@ if __name__ == "__main__":
                        " 00. Exit\n\n"
                        " Enter your choice: ")
         if choice == '1':
-            solved_board, _ = solve_sudoku_a_star(sudoku_board)
+            solved_board, _, _, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nFinal Solved Board:")
                 print(print_sudoku_board(solved_board))
@@ -109,7 +152,7 @@ if __name__ == "__main__":
                 print("No solution found.")
             break
         elif choice == '2':
-            solved_board, path = solve_sudoku_a_star(sudoku_board)
+            solved_board, path, _, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
                 func.show_procedure(path)
@@ -120,7 +163,7 @@ if __name__ == "__main__":
             break
         # Printing all steps automatically, remove if necessary
         elif choice == '3':
-            solved_board, path = solve_sudoku_a_star(sudoku_board)
+            solved_board, path, _, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
                 show_procedure_auto(path)
