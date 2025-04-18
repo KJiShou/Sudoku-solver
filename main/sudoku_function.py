@@ -431,38 +431,43 @@ if __name__ == "__main__":
                 while True:
                     print("Options:")
                     if limit_log is not None:
-                        print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
+                        print(f"  1. View step process by depth (max depth: {limit_log[-1]})")
                     else:
-                        print(f"  - Type 'process' to view all solving steps")
+                        print(f"  1. View full solving process")
 
-                    print("  - Type 'result' to see the final solved board")
-                    print("  - Type 'exit' to quit\n")
+                    print("  2. View final solved board")
+                    print("  0. Exit\n")
 
-                    cmd = input("What would you like to see? \n").strip().lower()
+                    cmd = input("Enter your choice: ").strip()
 
-                    if cmd == 'exit':
+                    if cmd == '0':
                         print("Exiting. Goodbye!")
                         break
-                    elif cmd == 'result':
+                    elif cmd == '2':
                         print_sudoku_result(solution, time_taken, peak)
-                    elif cmd == 'process' and limit_log is None:
-                        show_procedure(process)
-                    elif cmd.isdigit() and limit_log is not None:
-                        depth_choice = int(cmd)
-                        filtered_boards = []
-                        filtered_depths = []
-                        for b, d, l in zip(process, depth_log, limit_log):
-                            if l == depth_choice:
-                                filtered_boards.append(b)
-                                filtered_depths.append(d)
-
-                        if not filtered_boards:
-                            print(f"No steps found for depth {depth_choice}. Try another.\n")
+                    elif cmd == '1':
+                        if limit_log is None:
+                            show_procedure(process)
                         else:
-                            print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
-                            show_procedure(filtered_boards, filtered_depths)
+                            depth_choice = input(f"Enter a depth level (0 - {limit_log[-1]}): ").strip()
+                            if depth_choice.isdigit():
+                                depth_choice = int(depth_choice)
+                                filtered_boards = []
+                                filtered_depths = []
+                                for b, d, l in zip(process, depth_log, limit_log):
+                                    if l == depth_choice:
+                                        filtered_boards.append(b)
+                                        filtered_depths.append(d)
+
+                                if not filtered_boards:
+                                    print(f"No steps found for depth {depth_choice}. Try another.\n")
+                                else:
+                                    print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
+                                    show_procedure(filtered_boards, filtered_depths)
+                            else:
+                                print("Invalid input. Please enter a number.\n")
                     else:
-                        print("Invalid command. Try again.\n")
+                        print("Invalid input. Please enter 0, 1, or 2.\n")
 
         elif cmd == "0":
             exit_flag = True
