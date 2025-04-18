@@ -147,7 +147,7 @@ if __name__ == "__main__":
     tracemalloc.start()
     start = time.time()
 
-    solution, process, depth_log, path, _ = solve_sudoku_with_logging(sudoku_data)
+    solution, process, depth_log, _ = solve_sudoku_with_logging(sudoku_data)
 
     end = time.time()
     current, peak = tracemalloc.get_traced_memory()
