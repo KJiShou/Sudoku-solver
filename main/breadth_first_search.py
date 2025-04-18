@@ -52,68 +52,28 @@ def is_valid(board, row, col, num):
     return True
 
 # BFS Sudoku Solver
-def bfs_sudoku_solver(board, mode):
-    start_time = time.time()
-    tracemalloc.start()
-
+def bfs_sudoku_solver(board):
     queue = deque([(board, 0)])  # (board, breadth level)
-    step = 0
-    enter_press_count = 0
-    skip_to_end = False
-    enter_limit_before_skip_prompt = 5
-    visited = set()
-
-    path_list = []         # Store board states
-    breadth_levels = []    # Store corresponding breadth levels
+    path_list = []               # Store board states
+    breadth_levels = []          # Store corresponding breadth levels
 
     while queue:
         current_board, breadth = queue.popleft()
-        step += 1
 
         path_list.append(copy.deepcopy(current_board))
         breadth_levels.append(breadth)
 
-        if mode == 1 and not skip_to_end:
-            print(f"\nStep {step} | Breadth Level {breadth}")
-            print_board_tidy(current_board, prev_board=None if step == 1 else prev_board)
-            input("Press Enter to continue...")
-            enter_press_count += 1
-
-            if enter_press_count % enter_limit_before_skip_prompt == 0:
-                choice = input("Do you want to skip to the final result now? (y/n): ").strip().lower()
-                if choice == 'y':
-                    skip_to_end = True
-
-        elif mode == 2:
-            print(f"\nStep {step} | Breadth Level {breadth}")
-            print_board_tidy(current_board, prev_board=None if step == 1 else prev_board)
-            time.sleep(0.05)
-
         empty_cell = find_empty_cell(current_board)
         if not empty_cell:
-            end_time = time.time()
-            current, peak = tracemalloc.get_traced_memory()
-            tracemalloc.stop()
-
-            print("\nSudoku Solved! Final board:")
-            print_board_tidy(current_board)
-            print(f"\nTotal steps: {step}")
-            print(f"Final breadth level: {breadth}")
-            print(f"Time taken: {end_time - start_time:.4f} seconds")
-            print(f"Peak memory usage: {peak / (1024 * 1024):.2f} MB")
-
-            # Return final board, full path, and levels
             return current_board, path_list, breadth_levels, None
 
         row, col = empty_cell
-        prev_board = current_board
         for num in range(1, 10):
             if is_valid(current_board, row, col, num):
                 new_board = copy.deepcopy(current_board)
                 new_board[row][col] = num
                 queue.append((new_board, breadth + 1))
 
-    print("\nNo solution found.")
     return None, path_list, breadth_levels, None
 
 if __name__ == "__main__":
