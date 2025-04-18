@@ -44,7 +44,6 @@ def find_empty(board):
 def solve_sudoku_with_logging(board):
     process = []
     depth_log = []
-    path = []
 
     board_copy = deepcopy(board)
     process.append((deepcopy(board_copy), []))  # Initial state, depth 0
@@ -58,22 +57,20 @@ def solve_sudoku_with_logging(board):
         for num in range(1, 10):
             if is_valid(board, num, row, col):
                 board[row][col] = num
-                path.append((row, col))
-                process.append((deepcopy(board), [(row, col)]))
+                process.append((deepcopy(board)))
                 depth_log.append(depth + 1)
 
                 if backtrack(board, depth + 1):
                     return True
 
                 board[row][col] = 0
-                path.pop()
-                process.append((deepcopy(board), [(row, col)]))
+                process.append((deepcopy(board)))
                 depth_log.append(depth + 1)
         return False
 
 # ======= need checking ========
     solved = backtrack(board_copy, 0)
-    return (board_copy if solved else None), process, depth_log, path, None
+    return (board_copy if solved else None), process, depth_log, None
 
 # ======= Menu & Display =======
 
@@ -135,22 +132,22 @@ def menu_after_solving(process, depth_log, solution):
 
 if __name__ == "__main__":
     sudoku_data = [
-        [0, 0, 0, 2, 6, 0, 7, 0, 1],
-        [6, 8, 0, 0, 7, 0, 0, 9, 0],
-        [1, 9, 0, 0, 0, 4, 5, 0, 0],
-        [8, 2, 0, 1, 0, 0, 0, 4, 0],
-        [0, 0, 4, 6, 0, 2, 9, 0, 0],
-        [0, 5, 0, 0, 0, 3, 0, 2, 8],
-        [0, 0, 9, 3, 0, 0, 0, 7, 4],
-        [0, 4, 0, 0, 5, 0, 0, 3, 6],
-        [7, 0, 3, 0, 1, 8, 0, 0, 0]
+        [8, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 3, 6, 0, 0, 0, 0, 0],
+        [0, 7, 0, 0, 9, 0, 2, 0, 0],
+        [0, 5, 0, 0, 0, 7, 0, 0, 0],
+        [0, 0, 0, 0, 4, 5, 7, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 3, 0],
+        [0, 0, 1, 0, 0, 0, 0, 6, 0],
+        [0, 0, 8, 5, 0, 0, 0, 1, 0],
+        [0, 9, 0, 0, 0, 0, 4, 0, 0]
     ]
 
     print("\nSolving Sudoku with Backtracking...\n")
     tracemalloc.start()
     start = time.time()
 
-    solution, process, depth_log, path, _ = solve_sudoku_with_logging(sudoku_data)
+    solution, process, depth_log, _ = solve_sudoku_with_logging(sudoku_data)
 
     end = time.time()
     current, peak = tracemalloc.get_traced_memory()
