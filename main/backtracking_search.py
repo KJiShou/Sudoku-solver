@@ -70,7 +70,7 @@ def solve_sudoku_with_logging(board):
 
 # ======= need checking ========
     solved = backtrack(board_copy, 0)
-    return (board_copy if solved else None), process, depth_log, None
+    return (board_copy if solved else None), process, depth_log
 
 # ======= Menu & Display =======
 

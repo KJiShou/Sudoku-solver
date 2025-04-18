@@ -139,11 +139,11 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
         row, col = find_empty(current_grid)
 =======
         if heuristic(current_board) == 0 and find_empty(current_board) is None:
-            return current_board, path, None, None
+            return current_board, path, None
 
         empty_cell = find_empty(current_board)
         if empty_cell is None: # Should be caught by the heuristic check above, but for robustness
-            return current_board, path, None, None
+            return current_board, path, None
 
         row, col = empty_cell
 >>>>>>> d598094 (a* search v5 more efficient)
@@ -156,10 +156,14 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
                 heapq.heappush(open_list, new_state)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     return None  # No solution found
 =======
     return None, path, None, None
 >>>>>>> d598094 (a* search v5 more efficient)
+=======
+    return None, path, None
+>>>>>>> aeedab5 (update iterative deepening search)
 
 solution = sudoku_function.sudoku_solver()
 
