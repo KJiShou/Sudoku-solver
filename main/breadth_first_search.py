@@ -79,17 +79,31 @@ def bfs_sudoku_solver(board):
 if __name__ == "__main__":
     # Sample Sudoku board
     sudoku_board = [
-        [5, 1, 6, 8, 4, 9, 7, 3, 2],
-        [3, 0, 7, 6, 0, 5, 0, 0, 0],
-        [8, 0, 9, 7, 0, 0, 0, 6, 5],
-        [1, 3, 5, 0, 6, 0, 9, 0, 7],
-        [4, 7, 2, 5, 9, 1, 0, 0, 6],
-        [9, 6, 8, 3, 7, 0, 5, 0, 0],
-        [2, 5, 3, 1, 8, 6, 0, 7, 4],
-        [6, 8, 4, 2, 0, 7, 0, 5, 0],
-        [7, 9, 1, 0, 5, 0, 6, 0, 8]
+        [0, 9, 3, 4, 7, 0, 0, 6, 0],
+        [0, 8, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 6, 0, 0, 0, 0, 1],
+        [8, 0, 0, 0, 0, 0, 0, 3, 0],
+        [0, 3, 4, 0, 0, 9, 0, 0, 5],
+        [1, 0, 0, 0, 4, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 5, 2, 0, 0],
+        [0, 6, 7, 0, 9, 0, 0, 1, 0],
+        [4, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
+
+    print("Solving...\n")
+    tracemalloc.start()
+    start_time = time.time()
 
     # Run solver and store the full path
     solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board)
+
+    end_time = time.time()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    # Show the solving procedure
     sf.show_procedure(path_list, breadth_levels)
+
+    # Print stats
+    print(f"\nSolved in {end_time - start_time:.2f} seconds")
+    print(f"Peak memory usage: {peak / (1024 ** 2):.2f} MB")
