@@ -144,7 +144,7 @@ if __name__ == "__main__":
                        " 00. Exit\n\n"
                        " Enter your choice: ")
         if choice == '1':
-            solved_board, _, _, _ = solve_sudoku_a_star(sudoku_board)
+            solved_board, _, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nFinal Solved Board:")
                 print(print_sudoku_board(solved_board))
@@ -152,7 +152,7 @@ if __name__ == "__main__":
                 print("No solution found.")
             break
         elif choice == '2':
-            solved_board, path, _, _ = solve_sudoku_a_star(sudoku_board)
+            solved_board, path, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
                 func.show_procedure(path)
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             break
         # Printing all steps automatically, remove if necessary
         elif choice == '3':
-            solved_board, path, _, _ = solve_sudoku_a_star(sudoku_board)
+            solved_board, path, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
                 show_procedure_auto(path)
