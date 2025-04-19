@@ -85,7 +85,7 @@ class SimulatedAnnealingSudoku:
                     best_process = deepcopy(current_process)
 
                     if best_cost == 0 and self.is_valid_solution(best_board):
-                        self.status_message = f"✅ Solved in {total_iterations} total iterations!"
+                        self.status_message = f"Solved in {total_iterations} total iterations!"
                         self.board = best_board
                         self.process = best_process
                         self.final_iteration = total_iterations
@@ -109,7 +109,7 @@ class SimulatedAnnealingSudoku:
         self.board = best_board
         self.process = best_process
         self.final_iteration = total_iterations
-        self.status_message = f"❌ Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
+        self.status_message = f"Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
         return False
 
 
@@ -177,9 +177,9 @@ if __name__ == "__main__":
 
     # Validation only if solve was successful
     if compare_boards(solver.board, correct_board):
-        print("✅ Final board matches the known correct solution.")
+        print("Final board matches the known correct solution.")
     else:
-        print("❌ Final board does NOT match the known correct solution.")
+        print("Final board does NOT match the known correct solution.")
 
     matches, percentage = closeness_score(solver.board, correct_board)
-    print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
+    print(f"Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
