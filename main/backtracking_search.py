@@ -15,16 +15,13 @@ def is_valid(board: list, num: int, row: int, col: int) -> bool:
                 return False
     return True
 
-def print_sudoku(board: list, highlight=None):
+def print_sudoku(board: list):
     print("\n" * 1)
     for row in range(9):
         row_str = ""
         for col in range(9):
             val = board[row][col]
-            if highlight and (row, col) in highlight:
-                cell = f"\033[91m{val if val != 0 else ' '}\033[0m"
-            else:
-                cell = f"{val if val != 0 else ' '}"
+            cell = f"{val if val != 0 else ' '}"
             row_str += f" {cell} "
             if col % 3 == 2 and col != 8:
                 row_str += "|"
@@ -46,7 +43,7 @@ def solve_sudoku_with_logging(board):
     depth_log = []
 
     board_copy = deepcopy(board)
-    process.append((deepcopy(board_copy), []))  # Initial state, depth 0
+    process.append(deepcopy(board_copy))  # Initial state, depth 0
     depth_log.append(0)
 
     def backtrack(board, depth):
@@ -57,18 +54,17 @@ def solve_sudoku_with_logging(board):
         for num in range(1, 10):
             if is_valid(board, num, row, col):
                 board[row][col] = num
-                process.append((deepcopy(board)))
+                process.append(deepcopy(board))
                 depth_log.append(depth + 1)
 
                 if backtrack(board, depth + 1):
                     return True
 
                 board[row][col] = 0
-                process.append((deepcopy(board)))
+                process.append(deepcopy(board))
                 depth_log.append(depth + 1)
         return False
 
-# ======= need checking ========
     solved = backtrack(board_copy, 0)
     return (board_copy if solved else None), process, depth_log
 
@@ -97,10 +93,10 @@ def menu_after_solving(process, depth_log, solution):
         return
 
     elif choice == '1':
-        for (board, highlight), depth in zip(process, depth_log):
+        for board, depth in zip(process, depth_log):
             step += 1
             print(f"\nStep {step} | Depth: {depth}")
-            print_sudoku(board, highlight)
+            print_sudoku(board)
             input("Press Enter to continue...")
             enter_count += 1
             if enter_count % enter_limit == 0:
@@ -114,7 +110,7 @@ def menu_after_solving(process, depth_log, solution):
         print_sudoku(solution)
 
     elif choice == '2':
-        for step, ((board), depth) in enumerate(zip(process, depth_log), 1):
+        for step, (board, depth) in enumerate(zip(process, depth_log), 1):
             print(f"\nStep {step} | Depth: {depth}")
             print_sudoku(board)
             time.sleep(0.05)
