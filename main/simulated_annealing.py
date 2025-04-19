@@ -63,43 +63,56 @@ class SimulatedAnnealingSudoku:
         return True
 
     def solve(self):
-        self.generate_random_solution()
-        temp = self.initial_temp
-        current_cost = self.calculate_cost()
-        self.process.append(deepcopy(self.board))
+        total_iterations = 0
+        max_total_iterations = 100_000  # Global iteration budget
+        best_board = None
+        best_cost = float("inf")
+        best_process = []
 
-        for iteration in range(self.max_iter):
-            if current_cost == 0:
-                if self.is_valid_solution(self.board):
-                    self.status_message = f"Solved in {iteration} iterations!"
-                    self.final_iteration = iteration
-                    return True
+        while total_iterations < max_total_iterations:
+            self.generate_random_solution()
+            temp = self.initial_temp
+            current_cost = self.calculate_cost()
+            current_process = [deepcopy(self.board)]
+
+            for iteration in range(self.max_iter):
+                total_iterations += 1
+
+                # Update best board if this one is better
+                if current_cost < best_cost:
+                    best_cost = current_cost
+                    best_board = deepcopy(self.board)
+                    best_process = deepcopy(current_process)
+
+                    if best_cost == 0 and self.is_valid_solution(best_board):
+                        self.status_message = f"✅ Solved in {total_iterations} total iterations!"
+                        self.board = best_board
+                        self.process = best_process
+                        self.final_iteration = total_iterations
+                        return True
+
+                old_board = self.board.copy()
+                self.swap_random_cells()
+                new_cost = self.calculate_cost()
+
+                if new_cost < current_cost or random.uniform(0, 1) < math.exp((current_cost - new_cost) / temp):
+                    current_cost = new_cost
+                    current_process.append(deepcopy(self.board))
                 else:
-                    self.status_message = f"Found invalid board after {iteration} iterations."
-                    self.final_iteration = iteration
-                    self.board = None
-                    return False
+                    self.board = old_board
 
-            old_board = self.board.copy()
-            self.swap_random_cells()
-            new_cost = self.calculate_cost()
+                temp *= self.cooling_rate
+                if temp < 0.001:
+                    break  # Restart now
 
-            if new_cost < current_cost or random.uniform(0, 1) < math.exp((current_cost - new_cost) / temp):
-                current_cost = new_cost
-                self.process.append(deepcopy(self.board))
-            else:
-                self.board = old_board
-
-            temp *= self.cooling_rate
-            if temp < 0.001:
-                self.status_message = f"Failed after {iteration} iterations."
-                self.final_iteration = iteration
-                self.board = None
-                return False
-
-        self.status_message = f"Failed after {self.max_iter} iterations."
-        self.final_iteration = self.max_iter
+        # If we're here, we didn't find a perfect solution — return best one
+        self.board = best_board
+        self.process = best_process
+        self.final_iteration = total_iterations
+        self.status_message = f"❌ Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
         return False
+
+
 
     def print_board(self):
         sf.print_board(self.board)
@@ -170,4 +183,3 @@ if __name__ == "__main__":
 
     matches, percentage = closeness_score(solver.board, correct_board)
     print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
-
