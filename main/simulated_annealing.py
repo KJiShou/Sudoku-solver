@@ -64,7 +64,7 @@ class SimulatedAnnealingSudoku:
 
     def solve(self):
         total_iterations = 0
-        max_total_iterations = 100_000  # Global iteration budget
+        max_total_iterations = 100_000
         best_board = None
         best_cost = float("inf")
         best_process = []
@@ -78,14 +78,13 @@ class SimulatedAnnealingSudoku:
             for iteration in range(self.max_iter):
                 total_iterations += 1
 
-                # Update best board if this one is better
                 if current_cost < best_cost:
                     best_cost = current_cost
                     best_board = deepcopy(self.board)
                     best_process = deepcopy(current_process)
 
                     if best_cost == 0 and self.is_valid_solution(best_board):
-                        self.status_message = f"Solved in {total_iterations} total iterations!"
+                        self.status_message = f"✅ Solved in {total_iterations} total iterations!"
                         self.board = best_board
                         self.process = best_process
                         self.final_iteration = total_iterations
@@ -103,15 +102,19 @@ class SimulatedAnnealingSudoku:
 
                 temp *= self.cooling_rate
                 if temp < 0.001:
-                    break  # Restart now
+                    break
 
-        # If we're here, we didn't find a perfect solution — return best one
-        self.board = best_board
-        self.process = best_process
-        self.final_iteration = total_iterations
-        self.status_message = f"Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
-        return False
-
+        # Final validation: even best board is not valid
+        if best_board is not None and self.is_valid_solution(best_board):
+            self.status_message = f"⚠️ Could not find perfect solution, but returning best valid attempt (cost {best_cost})"
+            self.board = best_board
+            self.process = best_process
+            self.final_iteration = total_iterations
+            return True
+        else:
+            self.status_message = f"❌ Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
+            self.board = None  # Force menu to treat as failure
+            return False
 
 
     def print_board(self):
