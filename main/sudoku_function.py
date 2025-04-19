@@ -411,7 +411,8 @@ if __name__ == "__main__":
                 print("\nPerformance Summary:")
                 for i, (s, t, m) in enumerate(results):
                     if t is not None:
-                        print(f"{names[i]:<25} | {"  Solved  " if s is not None else "Not Solved"} | Time: {t:.4f}s | Memory: {m / (1024 * 1024):.2f} MB")
+                        solve = "  Solved  " if s is not None else "Not Solved"
+                        print(f"{names[i]:<25} | {solve} | Time: {t:.4f}s | Memory: {m / (1024 * 1024):.2f} MB")
                     else:
                         print(f"{names[i]:<25} | Failed to run.")
 
