@@ -177,9 +177,9 @@ if __name__ == "__main__":
 
     # Validation only if solve was successful
     if compare_boards(solver.board, correct_board):
-        print("✅ Final board matches the known correct solution.")
+        print("Final board matches the known correct solution.")
     else:
-        print("❌ Final board does NOT match the known correct solution.")
+        print("Final board does NOT match the known correct solution.")
 
     matches, percentage = closeness_score(solver.board, correct_board)
-    print(f"📊 Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
+    print(f"Closeness to correct answer: {matches}/81 cells correct ({percentage}%)")
