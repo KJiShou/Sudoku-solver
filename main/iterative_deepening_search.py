@@ -74,7 +74,7 @@ if __name__ == "__main__":
     tracemalloc.start()
     start_time = time.time()
 
-    solution, process, depth_log, limit_log = iterative_deepening(sudoku_test_data_10)
+    solution, process, depth_log = iterative_deepening(sudoku_test_data_10)
 
     # Stop animation
     sdk.solving = False
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # Interactive loop
     while True:
         print("Options:")
-        print(f"  - Enter a depth limit (max: {limit_log[-1]}) to view that step process")
+        print("  - press 1 show process")
         print("  - Type 'result' to see the final solved board")
         print("  - Type 'exit' to quit\n")
 
@@ -104,19 +104,7 @@ if __name__ == "__main__":
             break
         elif cmd == 'result':
             sdk.print_sudoku_result(solution)
-        elif cmd.isdigit():
-            depth_choice = int(cmd)
-            filtered_boards = []
-            filtered_depths = []
-            for b, d, l in zip(process, depth_log, limit_log):
-                if l == depth_choice:
-                    filtered_boards.append(b)
-                    filtered_depths.append(d)
-
-            if not filtered_boards:
-                print(f"No steps found for depth {depth_choice}. Try another.\n")
-            else:
-                print(f"\nShowing {len(filtered_boards)} step(s) for depth {depth_choice}")
-                sdk.show_procedure(filtered_boards, filtered_depths)
+        elif cmd == "1" :
+            sdk.show_procedure(process, depth_log)
         else:
             print("Invalid command. Try again.\n")

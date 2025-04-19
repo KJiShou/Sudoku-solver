@@ -90,30 +90,6 @@ if __name__ == "__main__":
         [7, 9, 1, 0, 5, 0, 6, 0, 8]
     ]
 
-    # Mode selection
-    print("Sudoku Solver - Breadth-First Search")
-    print("Select mode:")
-    print("1. Manual (press Enter for each step)")
-    print("2. Auto step-by-step")
-    print("3. Direct to final result")
-    while True:
-        try:
-            mode = int(input("Enter mode (1/2/3): "))
-            if mode in [1, 2, 3]:
-                break
-            else:
-                print("Please choose 1, 2, or 3.")
-        except ValueError:
-            print("Invalid input. Try again.")
-
-    if mode == 3:
-        mode = 0  # For skipping to final
-
     # Run solver and store the full path
-    solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board, mode)
+    solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board)
     sf.show_procedure(path_list, breadth_levels)
-
-    # Optional: print path afterwards
-    # for idx, (b, lvl) in enumerate(zip(path_list, breadth_levels), 1):
-    #     print(f"\nStep {idx} | Breadth Level {lvl}")
-    #     print_board_tidy(b)

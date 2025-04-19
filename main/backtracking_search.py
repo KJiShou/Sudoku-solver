@@ -114,9 +114,9 @@ def menu_after_solving(process, depth_log, solution):
         print_sudoku(solution)
 
     elif choice == '2':
-        for step, ((board, highlight), depth) in enumerate(zip(process, depth_log), 1):
+        for step, ((board), depth) in enumerate(zip(process, depth_log), 1):
             print(f"\nStep {step} | Depth: {depth}")
-            print_sudoku(board, highlight)
+            print_sudoku(board)
             time.sleep(0.05)
 
         print(f"\nFinal Solved Board (Depth: {depth_log[-1]}):")
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     tracemalloc.start()
     start = time.time()
 
-    solution, process, depth_log, _ = solve_sudoku_with_logging(sudoku_data)
+    solution, process, depth_log = solve_sudoku_with_logging(sudoku_data)
 
     end = time.time()
     current, peak = tracemalloc.get_traced_memory()
