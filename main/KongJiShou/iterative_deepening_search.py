@@ -2,7 +2,7 @@ import time
 import tracemalloc
 from copy import deepcopy
 import threading
-import sudoku_function as sdk  # Contains helper methods like printing board and animation
+from main.KongJiShou_TanZhongYen_NgZheWei_CheaHongJun_TeohYongMing import sudoku_function as sdk  # Contains helper methods like printing board and animation
 
 
 def find_empty(board):

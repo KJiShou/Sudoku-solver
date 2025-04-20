@@ -2,7 +2,7 @@ import random
 import math
 import numpy as np
 from copy import deepcopy
-import sudoku_function as sf
+from main.KongJiShou_TanZhongYen_NgZheWei_CheaHongJun_TeohYongMing import sudoku_function as sf  # Contains helper methods like printing board and animation
 
 
 class SimulatedAnnealingSudoku:

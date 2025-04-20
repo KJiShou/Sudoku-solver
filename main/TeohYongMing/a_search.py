@@ -2,7 +2,8 @@ import heapq
 import time
 import tracemalloc
 from copy import deepcopy
-import sudoku_function as func  # Assumes external functions like `show_procedure` are defined here
+from main.KongJiShou_TanZhongYen_NgZheWei_CheaHongJun_TeohYongMing import sudoku_function as func  # Contains helper methods like printing board and animation
+
 
 # ======== Display Functions ========
 
