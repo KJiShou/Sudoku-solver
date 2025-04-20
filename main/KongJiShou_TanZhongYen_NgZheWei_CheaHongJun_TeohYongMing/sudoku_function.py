@@ -1,12 +1,11 @@
 import time
 import tracemalloc
-from copy import deepcopy
 import threading
-import iterative_deepening_search as ids
-import backtracking_search as bs
-import a_search as ass
-import simulated_annealing as sa
-import breadth_first_search as bfs
+from main.KongJiShou import iterative_deepening_search as ids
+from main.CheaHongJun import backtracking_search as bs
+from main.TeohYongMing import a_search as ass
+from main.NgZheWei import simulated_annealing as sa
+from main.TanZhongYen import breadth_first_search as bfs
 
 # Animation thread flag
 solving = True
