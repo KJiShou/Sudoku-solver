@@ -4,8 +4,14 @@ import tracemalloc
 import sudoku_function as sf
 from collections import deque
 
-# Tidy board printing with highlighted changes
+# --------------------------------------------
+# Nicely formatted board printer with highlights
+# --------------------------------------------
 def print_board_tidy(board, prev_board=None):
+    """
+    Print a Sudoku board in a visually structured format.
+    Highlight differences compared to the previous board state.
+    """
     print("-" * 49)
     for i in range(9):
         row = ""
@@ -29,16 +35,28 @@ def print_board_tidy(board, prev_board=None):
         if (i + 1) % 3 == 0:
             print("-" * 49)
 
-# Find next empty cell
+# --------------------------------------------
+# Find first empty cell in board (returns tuple or None)
+# --------------------------------------------
 def find_empty_cell(board):
+    """
+    Return the position (row, col) of the first empty cell (value = 0).
+    If the board is full, return None.
+    """
     for i in range(9):
         for j in range(9):
             if board[i][j] == 0:
                 return i, j
     return None
 
-# Check validity
+# --------------------------------------------
+# Check if a number is valid in a given cell
+# --------------------------------------------
 def is_valid(board, row, col, num):
+    """
+    Return True if placing `num` at (row, col) is valid in current board.
+    Checks row, column, and 3x3 subgrid.
+    """
     if num in board[row]:
         return False
     if num in [board[i][col] for i in range(9)]:
@@ -51,11 +69,18 @@ def is_valid(board, row, col, num):
                 return False
     return True
 
-# BFS Sudoku Solver
+# --------------------------------------------
+# Breadth-First Search (BFS) Sudoku Solver
+# --------------------------------------------
 def bfs_sudoku_solver(board):
-    queue = deque([(board, 0)])  # (board, breadth level)
-    path_list = []               # Store board states
-    breadth_levels = []          # Store corresponding breadth levels
+    """
+    Solve the Sudoku puzzle using Breadth-First Search (BFS).
+    Returns the solved board (if found), all intermediate boards (path_list),
+    and their respective breadth levels (breadth_levels).
+    """
+    queue = deque([(board, 0)])  # Start queue with initial board and level 0
+    path_list = []               # Store all visited board states
+    breadth_levels = []          # Corresponding breadth levels (steps)
 
     while queue:
         current_board, breadth = queue.popleft()
@@ -65,7 +90,7 @@ def bfs_sudoku_solver(board):
 
         empty_cell = find_empty_cell(current_board)
         if not empty_cell:
-            return current_board, path_list, breadth_levels
+            return current_board, path_list, breadth_levels  # Solved
 
         row, col = empty_cell
         for num in range(1, 10):
@@ -74,10 +99,13 @@ def bfs_sudoku_solver(board):
                 new_board[row][col] = num
                 queue.append((new_board, breadth + 1))
 
-    return None, path_list, breadth_levels
+    return None, path_list, breadth_levels  # No solution found
 
+# --------------------------------------------
+# Main Test Script
+# --------------------------------------------
 if __name__ == "__main__":
-    # Sample Sudoku board
+    # Sample Sudoku puzzle (moderate difficulty)
     sudoku_board = [
         [0, 9, 3, 4, 7, 0, 0, 6, 0],
         [0, 8, 0, 0, 0, 0, 0, 0, 0],
@@ -91,19 +119,21 @@ if __name__ == "__main__":
     ]
 
     print("Solving...\n")
+
+    # Start memory and time tracking
     tracemalloc.start()
     start_time = time.time()
 
-    # Run solver and store the full path
+    # Run the BFS solver
     solved_board, path_list, breadth_levels = bfs_sudoku_solver(sudoku_board)
 
     end_time = time.time()
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
 
-    # Show the solving procedure
+    # Show the solving animation
     sf.show_procedure(path_list, breadth_levels)
 
-    # Print stats
+    # Output performance statistics
     print(f"\nSolved in {end_time - start_time:.2f} seconds")
     print(f"Peak memory usage: {peak / (1024 ** 2):.2f} MB")

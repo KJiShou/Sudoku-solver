@@ -2,9 +2,14 @@ import heapq
 import time
 import tracemalloc
 from copy import deepcopy
-import sudoku_function as func
+import sudoku_function as func  # Assumes external functions like `show_procedure` are defined here
+
+# ======== Display Functions ========
 
 def print_sudoku_board(board: list):
+    """
+    Format and return the Sudoku board as a string for pretty printing.
+    """
     output = ""
     for i in range(9):
         if i % 3 == 0 and i != 0:
@@ -18,22 +23,28 @@ def print_sudoku_board(board: list):
     return output
 
 def show_procedure_auto(board_list: list):
+    """
+    Automatically display all board states in the solving path with a short delay.
+    """
     total_step = len(board_list)
     for i in range(total_step):
         print(f"\nStep {i + 1}:")
         print(print_sudoku_board(board_list[i]))
-        time.sleep(0.5) # Adjust speed if needed
+        time.sleep(0.5)  # Adjust speed if needed
+
+
+# ======== Sudoku Logic & Heuristic ========
 
 def is_valid(board, row, col, num):
-    """Checks if placing 'num' at (row, col) is valid for that specific cell."""
-    # Check row
-    if num in board[row]:
+    """
+    Check if placing `num` at (row, col) is valid under Sudoku rules.
+    """
+    if num in board[row]:  # Row check
         return False
-    # Check column
-    for i in range(9):
+    for i in range(9):  # Column check
         if board[i][col] == num:
             return False
-    # Check 3x3 box
+    # Box check
     start_row, start_col = 3 * (row // 3), 3 * (col // 3)
     for i in range(3):
         for j in range(3):
@@ -42,7 +53,9 @@ def is_valid(board, row, col, num):
     return True
 
 def find_empty(board):
-    """Finds the empty cell with the fewest possible valid values."""
+    """
+    Find the empty cell with the fewest valid candidate numbers (MRV heuristic).
+    """
     min_options = float('inf')
     best_empty = None
     for row in range(9):
@@ -58,16 +71,21 @@ def find_empty(board):
     return best_empty
 
 def heuristic(board):
-    """Heuristic: total number of rule violations in the current grid."""
+    """
+    Heuristic function: returns number of violations in the board.
+    Violations = repeated numbers in rows, columns, and boxes.
+    """
     violations = 0
-    # Check rows
+
+    # Row violations
     for row in board:
         seen = set()
         for num in row:
             if num != 0 and num in seen:
                 violations += 1
             seen.add(num)
-    # Check columns
+
+    # Column violations
     for col in range(9):
         seen = set()
         for row in range(9):
@@ -75,7 +93,8 @@ def heuristic(board):
             if num != 0 and num in seen:
                 violations += 1
             seen.add(num)
-    # Check 3x3 blocks
+
+    # Box violations
     for block_row in range(3):
         for block_col in range(3):
             seen = set()
@@ -87,14 +106,23 @@ def heuristic(board):
                     seen.add(num)
     return violations
 
+
+# ======== A* Sudoku Solver ========
+
 def solve_sudoku_a_star(initial_board, show_steps=False):
-    """Solves Sudoku using A* search for selecting the next empty cell."""
+    """
+    Solve Sudoku using A* search algorithm with heuristic guidance.
+    Returns:
+        - final board
+        - list of visited boards (process path)
+        - None (placeholder for compatibility)
+    """
     tracemalloc.start()
     start_time = time.time()
 
-    open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]  # (f, g, board, path)
+    open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]
     closed_set = set()
-    path = []
+
     while open_list:
         f, g, current_board, path = heapq.heappop(open_list)
         board_tuple = tuple(map(tuple, current_board))
@@ -107,7 +135,7 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
             return current_board, path, None
 
         empty_cell = find_empty(current_board)
-        if empty_cell is None: # Should be caught by the heuristic check above, but for robustness
+        if empty_cell is None:
             return current_board, path, None
 
         row, col = empty_cell
@@ -118,10 +146,12 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
                 h = heuristic(new_board)
                 new_path = deepcopy(path)
                 new_path.append(deepcopy(new_board))
-                new_state = (g + 1 + h, g + 1, new_board, new_path)
-                heapq.heappush(open_list, new_state)
+                heapq.heappush(open_list, (g + 1 + h, g + 1, new_board, new_path))
 
     return None, path, None
+
+
+# ======== Main Program / Menu ========
 
 if __name__ == "__main__":
     sudoku_board = [
@@ -151,17 +181,18 @@ if __name__ == "__main__":
             else:
                 print("No solution found.")
             break
+
         elif choice == '2':
             solved_board, path, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
                 print("\nSolving Steps:")
-                func.show_procedure(path)
+                func.show_procedure(path)  # External function for side-by-side visual
                 print("\nFinal Solved Board:")
                 print(print_sudoku_board(solved_board))
             else:
                 print("No solution found.")
             break
-        # Printing all steps automatically, remove if necessary
+
         elif choice == '3':
             solved_board, path, _ = solve_sudoku_a_star(sudoku_board)
             if solved_board:
@@ -172,8 +203,10 @@ if __name__ == "__main__":
             else:
                 print("No solution found.")
             break
+
         elif choice == '00':
             print("Exiting.")
             break
+
         else:
             print("Invalid choice. Please enter 1, 2, 3, or 00.")

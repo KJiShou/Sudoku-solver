@@ -4,8 +4,22 @@ import numpy as np
 from copy import deepcopy
 import sudoku_function as sf
 
+
 class SimulatedAnnealingSudoku:
+    """
+    Sudoku solver using the Simulated Annealing algorithm.
+    The class initializes with a Sudoku board, and attempts to find a valid solution
+    by minimizing a cost function through probabilistic search.
+    """
+
     def __init__(self, board, initial_temp=1.0, cooling_rate=0.995, max_iter=10000):
+        """
+        Initialize the solver with the given board and parameters.
+        :param board: 2D list representing the Sudoku puzzle
+        :param initial_temp: Starting temperature for annealing
+        :param cooling_rate: How quickly the temperature decreases
+        :param max_iter: Maximum iterations per SA cycle
+        """
         self.board = np.array(board)
         self.initial_temp = initial_temp
         self.cooling_rate = cooling_rate
@@ -16,9 +30,16 @@ class SimulatedAnnealingSudoku:
         self.final_iteration = 0
 
     def get_fixed_positions(self):
+        """
+        Return a list of (row, col) positions where the initial values are fixed (non-zero).
+        """
         return [(r, c) for r in range(9) for c in range(9) if self.board[r][c] != 0]
 
     def generate_random_solution(self):
+        """
+        Fill each row randomly with missing digits without changing fixed cells.
+        This creates a complete initial candidate solution.
+        """
         for r in range(9):
             missing_numbers = list(set(range(1, 10)) - set(self.board[r]))
             empty_positions = [c for c in range(9) if (r, c) not in self.fixed_positions]
@@ -27,6 +48,11 @@ class SimulatedAnnealingSudoku:
                 self.board[r][c] = num
 
     def calculate_cost(self):
+        """
+        Compute the cost of the current board:
+        - Penalty is based on repeated values in columns and 3x3 subgrids.
+        - Lower cost means closer to a valid solution.
+        """
         cost = 0
         for c in range(9):
             col_values = [self.board[r][c] for r in range(9)]
@@ -34,11 +60,14 @@ class SimulatedAnnealingSudoku:
         for box_r in range(0, 9, 3):
             for box_c in range(0, 9, 3):
                 subgrid_values = [self.board[r][c] for r in range(box_r, box_r + 3)
-                                                   for c in range(box_c, box_c + 3)]
+                                  for c in range(box_c, box_c + 3)]
                 cost += 9 - len(set(subgrid_values))
         return cost
 
     def swap_random_cells(self):
+        """
+        Swap two non-fixed cells in a randomly selected row to explore new configurations.
+        """
         row = random.randint(0, 8)
         non_fixed_cells = [c for c in range(9) if (row, c) not in self.fixed_positions]
         if len(non_fixed_cells) < 2:
@@ -48,6 +77,9 @@ class SimulatedAnnealingSudoku:
 
     @staticmethod
     def is_valid_solution(board):
+        """
+        Check if the board is a complete and valid Sudoku solution.
+        """
         for i in range(9):
             row = board[i, :]
             col = board[:, i]
@@ -63,6 +95,13 @@ class SimulatedAnnealingSudoku:
         return True
 
     def solve(self):
+        """
+        Perform the Simulated Annealing algorithm:
+        - Try to minimize the board cost.
+        - Accept worse solutions probabilistically.
+        - Stop when a valid solution is found or the iteration limit is reached.
+        :return: True if a valid solution is found, else False
+        """
         total_iterations = 0
         max_total_iterations = 100_000
         best_board = None
@@ -84,7 +123,7 @@ class SimulatedAnnealingSudoku:
                     best_process = deepcopy(current_process)
 
                     if best_cost == 0 and self.is_valid_solution(best_board):
-                        self.status_message = f"✅ Solved in {total_iterations} total iterations!"
+                        self.status_message = f"Solved in {total_iterations} total iterations!"
                         self.board = best_board
                         self.process = best_process
                         self.final_iteration = total_iterations
@@ -94,6 +133,7 @@ class SimulatedAnnealingSudoku:
                 self.swap_random_cells()
                 new_cost = self.calculate_cost()
 
+                # Metropolis criterion for simulated annealing
                 if new_cost < current_cost or random.uniform(0, 1) < math.exp((current_cost - new_cost) / temp):
                     current_cost = new_cost
                     current_process.append(deepcopy(self.board))
@@ -104,40 +144,56 @@ class SimulatedAnnealingSudoku:
                 if temp < 0.001:
                     break
 
-        # Final validation: even best board is not valid
+        # Final fallback if no perfect solution found
         if best_board is not None and self.is_valid_solution(best_board):
-            self.status_message = f"⚠️ Could not find perfect solution, but returning best valid attempt (cost {best_cost})"
+            self.status_message = f"Could not find perfect solution, but returning best valid attempt (cost {best_cost})"
             self.board = best_board
             self.process = best_process
             self.final_iteration = total_iterations
             return True
         else:
-            self.status_message = f"❌ Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
+            self.status_message = f"Could not fully solve. Best cost = {best_cost} after {total_iterations} iterations."
             self.board = None  # Force menu to treat as failure
             return False
 
-
     def print_board(self):
+        """
+        Print the current board using the helper function.
+        """
         sf.print_board(self.board)
 
     def print_process(self):
+        """
+        Display the step-by-step solving process using the helper function.
+        """
         sf.show_procedure(self.process)
 
 
 def compare_boards(board1, board2):
-    """Compare two 9x9 Sudoku boards. Return True if identical."""
+    """
+    Compare two 9x9 Sudoku boards.
+    :return: True if the boards are identical.
+    """
     return np.array_equal(np.array(board1), np.array(board2))
 
+
 def closeness_score(board1, board2):
-    """Return the number of matching cells and percentage similarity."""
+    """
+    Calculate how many cells match between two Sudoku boards.
+    :return: Number of matching cells, and the percentage match.
+    """
     b1 = np.array(board1)
     b2 = np.array(board2)
     matches = np.sum(b1 == b2)
     percentage = (matches / 81) * 100
     return matches, round(percentage, 2)
 
+
 if __name__ == "__main__":
-    # Initial Sudoku Board
+    """
+    Example usage of SimulatedAnnealingSudoku.
+    Loads a puzzle, solves it, prints the process, and evaluates closeness to known solution.
+    """
     initial_board = [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
         [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -150,7 +206,6 @@ if __name__ == "__main__":
         [0, 0, 0, 0, 8, 0, 0, 7, 9]
     ]
 
-    # Known correct solution to validate against
     correct_board = [
         [5, 3, 4, 6, 7, 8, 9, 1, 2],
         [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -163,22 +218,18 @@ if __name__ == "__main__":
         [3, 4, 5, 2, 8, 6, 1, 7, 9]
     ]
 
-    # Solve using SA
     solver = SimulatedAnnealingSudoku(initial_board)
     print("Initial Sudoku Board:")
     solver.print_board()
 
     success = solver.solve()
 
-    # Always show step history
     solver.print_process()
 
-    # Then show final result + validation
     print("\nFinal Sudoku Board:")
     solver.print_board()
     print(solver.status_message)
 
-    # Validation only if solve was successful
     if compare_boards(solver.board, correct_board):
         print("Final board matches the known correct solution.")
     else:

@@ -13,6 +13,10 @@ solving = True
 
 
 def is_valid(board: list, num: int, row: int, col: int) -> bool:
+    """
+        Check if placing 'num' at position (row, col) is valid
+        according to Sudoku rules (row, column, and 3x3 grid).
+    """
     for i in range(9):
         if board[row][i] == num or board[i][col] == num:
             return False
@@ -26,6 +30,10 @@ def is_valid(board: list, num: int, row: int, col: int) -> bool:
 
 
 def animate_solving():
+    """
+        Display an animated 'Solving...' text in the terminal while the solver runs,
+        using a separate thread.
+    """
     symbols = ["Solving.  ", "Solving.. ", "Solving..."]
     idx = 0
     while solving:
@@ -36,6 +44,10 @@ def animate_solving():
 
 # function to print sudoku board
 def print_sudoku_result(board: list, time_taken: float, peak_memory: float):
+    """
+        Print the final Sudoku board result along with time and memory usage stats.
+        Shows formatted output for solved or unsolved boards.
+    """
     print("")
     if board is None:
         print("Cannot Find the result!")
@@ -57,6 +69,9 @@ def print_sudoku_result(board: list, time_taken: float, peak_memory: float):
 
 
 def print_board(board):
+    """
+        Print a Sudoku board in formatted 9x9 layout.
+    """
     if board is None:
         print("Cannot Find the result!")
         return
@@ -72,6 +87,10 @@ def print_board(board):
     print("\n")
 
 def show_procedure(board_list: list, depth_list: list = None):
+    """
+        Visually show the step-by-step board transformation during the solving process.
+        Optionally displays search depth per step if depth_list is provided.
+    """
     depth_flag = None != depth_list
     skip_flag = False
     # get difference between two boards
@@ -154,6 +173,12 @@ def show_procedure(board_list: list, depth_list: list = None):
 
 # tract memory and time function
 def trace_function(algorithm, test_data: list):
+    """
+        Measure time and memory usage of a given Sudoku solving algorithm.
+        Also handles threading for animated solving feedback.
+        Supports both function-based and class-based algorithm inputs.
+        Returns the solution, solving process, optional depth log, time taken, and peak memory used.
+    """
     global solving
     solving = True
     anim_thread = threading.Thread(target=animate_solving)
@@ -198,6 +223,9 @@ def trace_function(algorithm, test_data: list):
 
 
 def display_menu(title, options):
+    """
+        Display a CLI menu with a given title and list of options.
+    """
     print(f"\n{title}")
     print("=" * len(title))
     for idx, option in enumerate(options, start=1):
