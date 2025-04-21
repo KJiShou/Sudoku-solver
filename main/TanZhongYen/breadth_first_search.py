@@ -5,37 +5,6 @@ from main.KongJiShou_TanZhongYen_NgZheWei_CheaHongJun_TeohYongMing import sudoku
 from collections import deque
 
 # --------------------------------------------
-# Nicely formatted board printer with highlights
-# --------------------------------------------
-def print_board_tidy(board, prev_board=None):
-    """
-    Print a Sudoku board in a visually structured format.
-    Highlight differences compared to the previous board state.
-    """
-    print("-" * 49)
-    for i in range(9):
-        row = ""
-        for j in range(9):
-            if j % 3 == 0:
-                row += "| "
-            num = board[i][j]
-            if prev_board and prev_board[i][j] != num:
-                if num == 0:
-                    cell = "     "
-                else:
-                    cell = f"*{num}*".center(5)
-            else:
-                if num == 0:
-                    cell = "     "
-                else:
-                    cell = f"{num}".center(5)
-            row += cell
-        row += "|"
-        print(row)
-        if (i + 1) % 3 == 0:
-            print("-" * 49)
-
-# --------------------------------------------
 # Find first empty cell in board (returns tuple or None)
 # --------------------------------------------
 def find_empty_cell(board):
