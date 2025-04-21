@@ -2,6 +2,25 @@
 
 This repository provides a powerful Sudoku solver implemented using various algorithmic search strategies. The aim is to explore and compare different types of search methods from **uninformed**, **informed**, and **local** search paradigms.
 
+## Prerequisites
+
+Before running this project, make sure you have the following dependencies installed:
+
+- Python 3.x
+- NumPy (>= 1.21.0)
+
+You can install the required dependencies using pip:
+
+```bash
+pip install numpy
+```
+
+Or install all dependencies from the project's setup.py:
+
+```bash
+pip install -e .
+```
+
 ## Overview
 
 The solver supports the following algorithms:
