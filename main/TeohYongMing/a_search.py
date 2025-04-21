@@ -118,8 +118,6 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
         - list of visited boards (process path)
         - None (placeholder for compatibility)
     """
-    tracemalloc.start()
-    start_time = time.time()
 
     open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]
     closed_set = set()

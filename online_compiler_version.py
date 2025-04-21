@@ -11,7 +11,24 @@ import heapq
 # Global flag for animation
 solving = True
 
-def is_valid(board, num, row, col):
+def as_is_valid(board, row, col, num):
+    """
+    Check if placing `num` at (row, col) is valid under Sudoku rules.
+    """
+    if num in board[row]:  # Row check
+        return False
+    for i in range(9):  # Column check
+        if board[i][col] == num:
+            return False
+    # Box check
+    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    for i in range(3):
+        for j in range(3):
+            if board[start_row + i][start_col + j] == num:
+                return False
+    return True
+
+def is_valid(board: list, num: int, row: int, col: int) -> bool:
     """
         Check if placing 'num' at position (row, col) is valid
         according to Sudoku rules (row, column, and 3x3 grid).
@@ -26,6 +43,24 @@ def is_valid(board, num, row, col):
             if board[start_row + i][start_col + j] == num:
                 return False
     return True
+
+def as_find_empty(board):
+    """
+    Find the empty cell with the fewest valid candidate numbers (MRV heuristic).
+    """
+    min_options = float('inf')
+    best_empty = None
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                options = 0
+                for num in range(1, 10):
+                    if as_is_valid(board, row, col, num):
+                        options += 1
+                if options < min_options:
+                    min_options = options
+                    best_empty = (row, col)
+    return best_empty
 
 def find_empty(board):
     """
@@ -219,8 +254,6 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
         - list of visited boards (process path)
         - None (placeholder for compatibility)
     """
-    tracemalloc.start()
-    start_time = time.time()
 
     open_list = [(heuristic(initial_board), 0, deepcopy(initial_board), [deepcopy(initial_board)])]
     closed_set = set()
@@ -233,16 +266,16 @@ def solve_sudoku_a_star(initial_board, show_steps=False):
             continue
         closed_set.add(board_tuple)
 
-        if heuristic(current_board) == 0 and find_empty(current_board) is None:
+        if heuristic(current_board) == 0 and as_find_empty(current_board) is None:
             return current_board, path, None
 
-        empty_cell = find_empty(current_board)
+        empty_cell = as_find_empty(current_board)
         if empty_cell is None:
             return current_board, path, None
 
         row, col = empty_cell
         for num in range(1, 10):
-            if is_valid(current_board, num, row, col):
+            if as_is_valid(current_board, row, col, num):
                 new_board = deepcopy(current_board)
                 new_board[row][col] = num
                 h = heuristic(new_board)
