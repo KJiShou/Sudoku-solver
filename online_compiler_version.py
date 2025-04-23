@@ -208,40 +208,11 @@ def bfs_sudoku_solver(board):
 
 # A* Search
 def heuristic(board):
-    """
-    Heuristic function: returns number of violations in the board.
-    Violations = repeated numbers in rows, columns, and boxes.
-    """
-    violations = 0
-
-    # Row violations
+    """Heuristic: number of empty cells."""
+    count = 0
     for row in board:
-        seen = set()
-        for num in row:
-            if num != 0 and num in seen:
-                violations += 1
-            seen.add(num)
-
-    # Column violations
-    for col in range(9):
-        seen = set()
-        for row in range(9):
-            num = board[row][col]
-            if num != 0 and num in seen:
-                violations += 1
-            seen.add(num)
-
-    # Box violations
-    for block_row in range(3):
-        for block_col in range(3):
-            seen = set()
-            for i in range(3):
-                for j in range(3):
-                    num = board[3 * block_row + i][3 * block_col + j]
-                    if num != 0 and num in seen:
-                        violations += 1
-                    seen.add(num)
-    return violations
+        count += row.count(0)
+    return count
 
 
 # ======== A* Sudoku Solver ========
