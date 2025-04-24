@@ -1,5 +1,3 @@
-# Sudoku Solver using AI Search Algorithms
-
 This repository provides a powerful Sudoku solver implemented using various algorithmic search strategies. The aim is to explore and compare different types of search methods from **uninformed**, **informed**, and **local** search paradigms.
 
 ## Prerequisites
@@ -46,3 +44,16 @@ Each algorithm visualizes the solving process step-by-step and provides detailed
 - Real-time performance metrics (execution time, memory usage)  
 - Support for 9x9 standard Sudoku puzzles  
 - Modular design for easy expansion or testing with new algorithms  
+
+## Module Responsibilities
+
+- **CheaHongJun/backtracking_search**: Implements the Backtracking Search algorithm.
+- **TanZhongYen/breadth_first_search**: Implements the Breadth-First Search (BFS) algorithm.
+- **KongJiShou/iterative_deepening_search**: Implements the Iterative Deepening Search (IDS) algorithm.
+- **TeohYongMing/a_search**: Implements the A* Search algorithm.
+- **NgZheWei/simulated_annealing**: Implements the Simulated Annealing algorithm.
+
+## Main Entry Point
+
+- **KongJiShou_TanZhongYen_NgZheWei_CheaHongJun_TeohYongMing/sudoku_function**: The main driver file that integrates all solver modules.
+
